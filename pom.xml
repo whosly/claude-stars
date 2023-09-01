@@ -19,14 +19,18 @@
 		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
 		<commons.collections4.version>4.0</commons.collections4.version>
 
-		<google.guava.version>27.0.1-jre</google.guava.version>
+<!--		<google.guava.version>27.0.1-jre</google.guava.version>-->
+		<google.guava.version>32.1.2-jre</google.guava.version>
 		<hutool.version>5.6.1</hutool.version>
 	</properties>
 
 	<modules>
 		<module>netty-capacity</module>
-	</modules>
 
+		<module>server-and-client</module>
+		<module>server-and-client-spring</module>
+		<module>simple</module>
+	</modules>
 
 	<dependencyManagement>
 		<dependencies>
@@ -62,33 +66,34 @@
 				<artifactId>logback-classic</artifactId>
 				<version>1.4.7</version>
 			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-core</artifactId>
+				<version>1.4.7</version>
+			</dependency>
 
 			<dependency>
 				<groupId>io.netty</groupId>
 				<artifactId>netty-all</artifactId>
 				<version>4.1.92.Final</version>
 			</dependency>
+
+			<!-- test  -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.13.2</version>
+				<scope>test</scope>
+			</dependency>
+			<!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>1.10.19</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
-
-	<dependencies>
-		<!-- test  -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.10.19</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
-
 
 	<build>
 		<pluginManagement>

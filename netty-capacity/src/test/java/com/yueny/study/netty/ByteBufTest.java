@@ -2,16 +2,19 @@ package com.yueny.study.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.junit.Test;
 
 import java.util.Arrays;
 
 /**
  * @author fengyang
- * @date 2023/6/30 上午11:18
- * @see <a href="fengyang@stoneatom.com">mailTo: fengyang@stoneatom.com</a>
+ * @date 2023/8/14 下午4:42
+ * @see <a href="yueny09@163.com">mailTo: yueny09@163.com</a>
  */
-public class NettyCapacityDemo {
-    public static void main(String[] args) {
+public class ByteBufTest
+{
+    @Test
+    public void test() {
         // 1.创建一个非池化的ByteBuf，大小为10个字节
         ByteBuf buf = Unpooled.buffer(30);
         System.out.println("创建一个非池化的ByteBuf, 大小为10个字节");
@@ -76,5 +79,4 @@ public class NettyCapacityDemo {
         System.out.println("写入一段内容后ByteBuf为===========>"+buf.toString());
         System.out.println("8.ByteBuf中的内容为===============>"+Arrays.toString(buf.array())+"\n");
     }
-
 }
