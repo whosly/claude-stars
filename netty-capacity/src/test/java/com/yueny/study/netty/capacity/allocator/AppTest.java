@@ -1,6 +1,6 @@
-package com.yueny.study.netty.allocator;
+package com.yueny.study.netty.capacity.allocator;
 
-import com.yueny.study.netty.allocator.BytesUtil;
+import com.yueny.study.netty.capacity.allocator.BytesUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**

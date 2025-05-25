@@ -1,14 +1,13 @@
-package com.yueny.study.netty.allocator;
+package com.yueny.study.netty.capacity.allocator;
 
-import com.yueny.study.netty.buffer.WrappedAutoFlushByteBuf;
+import com.yueny.study.netty.capacity.buffer.WrappedAutoFlushByteBuf;
 import io.netty.buffer.PooledByteBufAllocatorMetric;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Random;
+import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -18,60 +17,47 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 分配16MB 对象的 case
- *
  * @author fengyang
- * @date 2023/8/10 上午10:48
+ * @date 2023/8/15 下午4:41
  * @see <a href="yueny09@163.com">mailTo: yueny09@163.com</a>
  */
-public class ByteBufPoolAlloc16MBTest
+public class ByteBufPoolToNioTest
 {
-    private static Logger log = LoggerFactory.getLogger(ByteBufPoolAlloc16MBTest.class);
-
-    private ByteBufPoolConfig config;
-
-    @Before
-    public void before() {
-        this.config = ByteBufPoolConfig.builder()
-                .maxCapacity(Allocators._1MB * 16L)
-                .maxDirectMemory(DirectByteBufPooledAllocator.DEFAULT_MAX_ALLOCATOR_MEM)
-                .build();
-    }
+    private static Logger log = LoggerFactory.getLogger(ByteBufPoolReleaseTest.class);
 
     @Test
-    public void testA()
-    {
-//        System.setProperty("io.netty.maxDirectMemory", "2147483648");
-
+    public void testRelease() {
         DirectByteBufPooledAllocator pool = ByteBufPoolManager
                 .getInstance()
                 .createDirectByteBufPooled();
-
-        Random random = new Random();
 
         int initialCapacity = pool.getConfigInitialCapacity();
         log.info("initialCapacity:{}.", initialCapacity);
 
         Assert.assertEquals(pool.cacheSize(), 320);
 
-        WrappedAutoFlushByteBuf wByteBuf = pool.allocByteBuf(this.config.getMaxCapacity());
+        WrappedAutoFlushByteBuf wByteBuf = pool.allocByteBuf();
         Assert.assertTrue(wByteBuf.capacity() == pool.getConfigInitialCapacity());
         Assert.assertEquals(wByteBuf.writerIndex(), 0);
-        Assert.assertTrue(wByteBuf.maxCapacity() == this.config.getMaxCapacity());
+        Assert.assertTrue(wByteBuf.maxCapacity() == pool.getConfigMaxCapacity());
+
+        ByteBuffer nioBuf = wByteBuf.nioBuffer(0, wByteBuf.capacity());
+        Assert.assertTrue(nioBuf.isDirect());
 
         for (int i = 0; i < 60; i++) {
-            wByteBuf.writeByte(i);
+            nioBuf.putInt(i);
         }
         Assert.assertTrue(wByteBuf.capacity() == pool.getConfigInitialCapacity());
-        Assert.assertEquals(wByteBuf.writerIndex(), 60);
+        Assert.assertEquals(wByteBuf.writerIndex(), 0);
+        Assert.assertEquals(nioBuf.position(), 60 * 4);
 
-        long max = this.config.getMaxCapacity() - 60 - 10;
+        long max = nioBuf.capacity() / 4 - 240;
         for (int i = 0; i < max; i++) {
-            wByteBuf.writeByte(i);
+            nioBuf.putInt(i);
         }
-        // 存在扩容
-        Assert.assertTrue(wByteBuf.capacity() == this.config.getMaxCapacity());
-        Assert.assertEquals(wByteBuf.writerIndex(), this.config.getMaxCapacity() -10);
+        // nio 不存在扩容
+        Assert.assertEquals(nioBuf.position(), max * 4 + 60 * 4);
+//        wByteBuf.release();
 
         // 500 多线程同时申请 buffer.
         ExecutorService executorService = new ThreadPoolExecutor(16,
@@ -95,22 +81,21 @@ public class ByteBufPoolAlloc16MBTest
             int finalI = i;
             executorService.submit(() -> {
                 try {
-                    final WrappedAutoFlushByteBuf wrappedByteBuf = pool.allocByteBuf(
-                            this.config.getMaxCapacity()
-                    );
+                    final WrappedAutoFlushByteBuf wrappedByteBuf = pool.allocByteBuf(pool.getConfigMaxCapacity().intValue(), pool.getConfigMaxCapacity());
+                    final ByteBuffer nio = wrappedByteBuf.nioBuffer(0, wByteBuf.maxCapacity());
 
                     // 边写边读
                     Future futureWrite = CompletableFuture.runAsync(() -> {
-                        long max_ = this.config.getMaxCapacity();
+                        long max_ = nio.capacity() / 4;
                         for (int j = 0; j < max_; j++) {
-                            wrappedByteBuf.writeByte(j);
+                            nio.putInt(j);
                         }
                     });
                     futureWrite.get();
 
                     Future futureRead = CompletableFuture.runAsync(() -> {
-                        while (wrappedByteBuf.readableBytes() > 0) {
-                            wrappedByteBuf.readByte();
+                        while (nio.remaining() > 0) {
+                            nio.getInt();
                         }
                     });
                     futureRead.get();
@@ -125,8 +110,19 @@ public class ByteBufPoolAlloc16MBTest
                             numDirectArenas, metric.numThreadLocalCaches(),
                             BytesUtil.byteToM(metric.usedDirectMemory()));
 
-                    // 16MB 的 byteBuf release
+//                    // 必须要 release， 否则堆外内存不会被释放！！！
                     wrappedByteBuf.release();
+                    // flip: 切换读取模式，position初始为0，limit初始为可读取数据得最大下标
+                    // byteBuffer.flip(); //切换读取模式，position初始为0，limit初始为可读取数据得最大下标
+                    //clear: 在逻辑上清空ByteBuffer里的数据，实际上不清空数据
+                    //会触发的动作：
+                    //  将limit设置为capacity
+                    //  position指向起始位置0
+                    //提示：实际上数据并未清理，只是下次是从0的位置开始写入数据，效果上像是数据清空了。
+                    //提示：如果ByteBuffer中的数据并未完全读完，调用这个方法将忽略那些未读取的数据。
+//                    nio.clear();
+//                    // 重复读取一次， 只是将position移到第一位置
+//                    nio.rewind();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }finally {
@@ -168,5 +164,4 @@ public class ByteBufPoolAlloc16MBTest
 
         log.info("执行结束!");
     }
-
 }

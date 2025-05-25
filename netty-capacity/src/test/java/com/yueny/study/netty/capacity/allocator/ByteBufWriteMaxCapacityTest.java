@@ -1,6 +1,6 @@
-package com.yueny.study.netty.allocator;
+package com.yueny.study.netty.capacity.allocator;
 
-import com.yueny.study.netty.buffer.WrappedAutoFlushByteBuf;
+import com.yueny.study.netty.capacity.buffer.WrappedAutoFlushByteBuf;
 import io.netty.util.ReferenceCountUtil;
 import org.junit.Assert;
 import org.junit.Before;

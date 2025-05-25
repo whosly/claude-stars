@@ -1,4 +1,4 @@
-package com.yueny.study.netty.allocator;
+package com.yueny.study.netty.capacity.allocator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

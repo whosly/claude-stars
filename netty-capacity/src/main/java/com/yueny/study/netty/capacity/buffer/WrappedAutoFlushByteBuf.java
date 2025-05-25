@@ -1,4 +1,4 @@
-package com.yueny.study.netty.buffer;
+package com.yueny.study.netty.capacity.buffer;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;

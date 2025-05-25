@@ -1,4 +1,4 @@
-package com.yueny.study.netty.alloc;
+package com.yueny.study.netty.capacity.alloc;
 
 /**
  * 内存分配器类型

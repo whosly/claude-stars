@@ -1,4 +1,4 @@
-package com.yueny.study.netty.alloc;
+package com.yueny.study.netty.capacity.alloc;
 
 /**
  * 标志， 用于标志当前为(堆外、堆内)内存分配器，便于后续整合与管理

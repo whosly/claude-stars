@@ -1,4 +1,4 @@
-package com.yueny.study.netty.allocator;
+package com.yueny.study.netty.capacity.allocator;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;

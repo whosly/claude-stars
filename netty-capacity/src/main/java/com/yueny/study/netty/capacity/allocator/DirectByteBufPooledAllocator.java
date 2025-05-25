@@ -1,13 +1,12 @@
-package com.yueny.study.netty.allocator;
+package com.yueny.study.netty.capacity.allocator;
 
 import com.google.common.collect.ImmutableMap;
-import com.yueny.study.netty.buffer.ByteBufWrappers;
-import com.yueny.study.netty.buffer.WrappedAutoFlushByteBuf;
+import com.yueny.study.netty.capacity.buffer.ByteBufWrappers;
+import com.yueny.study.netty.capacity.buffer.WrappedAutoFlushByteBuf;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocatorMetric;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocatorMetric;
-import io.netty.util.NettyRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

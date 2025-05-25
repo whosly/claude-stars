@@ -1,4 +1,4 @@
-package com.yueny.study.netty;
+package com.yueny.study.netty.capacity;
 
 import org.slf4j.Logger;
 

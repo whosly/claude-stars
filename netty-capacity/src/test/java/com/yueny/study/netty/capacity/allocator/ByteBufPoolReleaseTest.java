@@ -1,13 +1,13 @@
-package com.yueny.study.netty.allocator;
+package com.yueny.study.netty.capacity.allocator;
 
-import com.yueny.study.netty.buffer.WrappedAutoFlushByteBuf;
+import com.yueny.study.netty.capacity.buffer.WrappedAutoFlushByteBuf;
 import io.netty.buffer.PooledByteBufAllocatorMetric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -17,19 +17,27 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * ByteBuf 做 release  的 Case
+ *
  * @author fengyang
- * @date 2023/8/15 下午4:41
+ * @date 2023/8/14 下午3:08
  * @see <a href="yueny09@163.com">mailTo: yueny09@163.com</a>
  */
-public class ByteBufPoolToNioTest
+public class ByteBufPoolReleaseTest
 {
     private static Logger log = LoggerFactory.getLogger(ByteBufPoolReleaseTest.class);
 
+    private static boolean isRelease = true;
+
     @Test
     public void testRelease() {
+        System.setProperty("io.netty.maxDirectMemory", "2147483648");
+
         DirectByteBufPooledAllocator pool = ByteBufPoolManager
                 .getInstance()
                 .createDirectByteBufPooled();
+
+        Random random = new Random();
 
         int initialCapacity = pool.getConfigInitialCapacity();
         log.info("initialCapacity:{}.", initialCapacity);
@@ -41,23 +49,23 @@ public class ByteBufPoolToNioTest
         Assert.assertEquals(wByteBuf.writerIndex(), 0);
         Assert.assertTrue(wByteBuf.maxCapacity() == pool.getConfigMaxCapacity());
 
-        ByteBuffer nioBuf = wByteBuf.nioBuffer(0, wByteBuf.capacity());
-        Assert.assertTrue(nioBuf.isDirect());
-
         for (int i = 0; i < 60; i++) {
-            nioBuf.putInt(i);
+            wByteBuf.writeByte(i);
         }
         Assert.assertTrue(wByteBuf.capacity() == pool.getConfigInitialCapacity());
-        Assert.assertEquals(wByteBuf.writerIndex(), 0);
-        Assert.assertEquals(nioBuf.position(), 60 * 4);
+        Assert.assertEquals(wByteBuf.writerIndex(), 60);
 
-        long max = nioBuf.capacity() / 4 - 240;
+        long max = pool.getConfigMaxCapacity() - 60 - 10;
         for (int i = 0; i < max; i++) {
-            nioBuf.putInt(i);
+            wByteBuf.writeByte(i);
         }
-        // nio 不存在扩容
-        Assert.assertEquals(nioBuf.position(), max * 4 + 60 * 4);
-//        wByteBuf.release();
+        // 存在扩容
+        Assert.assertTrue(wByteBuf.capacity() == pool.getConfigMaxCapacity());
+        Assert.assertEquals(wByteBuf.writerIndex(), pool.getConfigMaxCapacity() -10);
+
+        if(isRelease){
+            wByteBuf.release();
+        }
 
         // 500 多线程同时申请 buffer.
         ExecutorService executorService = new ThreadPoolExecutor(16,
@@ -65,7 +73,7 @@ public class ByteBufPoolToNioTest
                 1,
                 TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>());
-        int size = 1500;
+        int size = 500;
         CountDownLatch countDownLatch = new CountDownLatch(size);
 
         /**
@@ -81,21 +89,20 @@ public class ByteBufPoolToNioTest
             int finalI = i;
             executorService.submit(() -> {
                 try {
-                    final WrappedAutoFlushByteBuf wrappedByteBuf = pool.allocByteBuf(pool.getConfigMaxCapacity().intValue(), pool.getConfigMaxCapacity());
-                    final ByteBuffer nio = wrappedByteBuf.nioBuffer(0, wByteBuf.maxCapacity());
+                    final WrappedAutoFlushByteBuf wrappedByteBuf = pool.allocByteBuf();
 
                     // 边写边读
                     Future futureWrite = CompletableFuture.runAsync(() -> {
-                        long max_ = nio.capacity() / 4;
+                        long max_ = pool.getConfigMaxCapacity();
                         for (int j = 0; j < max_; j++) {
-                            nio.putInt(j);
+                            wrappedByteBuf.writeByte(j);
                         }
                     });
                     futureWrite.get();
 
                     Future futureRead = CompletableFuture.runAsync(() -> {
-                        while (nio.remaining() > 0) {
-                            nio.getInt();
+                        while (wrappedByteBuf.readableBytes() > 0) {
+                            wrappedByteBuf.readByte();
                         }
                     });
                     futureRead.get();
@@ -110,19 +117,10 @@ public class ByteBufPoolToNioTest
                             numDirectArenas, metric.numThreadLocalCaches(),
                             BytesUtil.byteToM(metric.usedDirectMemory()));
 
-//                    // 必须要 release， 否则堆外内存不会被释放！！！
-                    wrappedByteBuf.release();
-                    // flip: 切换读取模式，position初始为0，limit初始为可读取数据得最大下标
-                    // byteBuffer.flip(); //切换读取模式，position初始为0，limit初始为可读取数据得最大下标
-                    //clear: 在逻辑上清空ByteBuffer里的数据，实际上不清空数据
-                    //会触发的动作：
-                    //  将limit设置为capacity
-                    //  position指向起始位置0
-                    //提示：实际上数据并未清理，只是下次是从0的位置开始写入数据，效果上像是数据清空了。
-                    //提示：如果ByteBuffer中的数据并未完全读完，调用这个方法将忽略那些未读取的数据。
-//                    nio.clear();
-//                    // 重复读取一次， 只是将position移到第一位置
-//                    nio.rewind();
+                    if(isRelease){
+                        // 必须要 release， 否则堆外内存不会被释放！！！
+                        wrappedByteBuf.release();
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }finally {

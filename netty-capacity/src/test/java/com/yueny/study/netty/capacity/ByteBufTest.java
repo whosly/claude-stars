@@ -1,4 +1,4 @@
-package com.yueny.study.netty;
+package com.yueny.study.netty.capacity;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

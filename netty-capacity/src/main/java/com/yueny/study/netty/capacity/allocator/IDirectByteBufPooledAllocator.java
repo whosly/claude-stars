@@ -1,8 +1,8 @@
-package com.yueny.study.netty.allocator;
+package com.yueny.study.netty.capacity.allocator;
 
-import com.yueny.study.netty.alloc.AllocatorType;
-import com.yueny.study.netty.alloc.IAllocator;
-import com.yueny.study.netty.buffer.WrappedAutoFlushByteBuf;
+import com.yueny.study.netty.capacity.alloc.AllocatorType;
+import com.yueny.study.netty.capacity.alloc.IAllocator;
+import com.yueny.study.netty.capacity.buffer.WrappedAutoFlushByteBuf;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocatorMetric;
 

@@ -1,8 +1,9 @@
-package com.yueny.study.netty.allocator;
+package com.yueny.study.netty.capacity.allocator;
 
-import com.yueny.study.netty.buffer.WrappedAutoFlushByteBuf;
+import com.yueny.study.netty.capacity.buffer.WrappedAutoFlushByteBuf;
 import io.netty.buffer.PooledByteBufAllocatorMetric;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,21 +18,30 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * ByteBuf 做 release  的 Case
+ * 分配16MB 对象的 case
  *
  * @author fengyang
- * @date 2023/8/14 下午3:08
+ * @date 2023/8/10 上午10:48
  * @see <a href="yueny09@163.com">mailTo: yueny09@163.com</a>
  */
-public class ByteBufPoolReleaseTest
+public class ByteBufPoolAlloc16MBTest
 {
-    private static Logger log = LoggerFactory.getLogger(ByteBufPoolReleaseTest.class);
+    private static Logger log = LoggerFactory.getLogger(ByteBufPoolAlloc16MBTest.class);
 
-    private static boolean isRelease = true;
+    private ByteBufPoolConfig config;
+
+    @Before
+    public void before() {
+        this.config = ByteBufPoolConfig.builder()
+                .maxCapacity(Allocators._1MB * 16L)
+                .maxDirectMemory(DirectByteBufPooledAllocator.DEFAULT_MAX_ALLOCATOR_MEM)
+                .build();
+    }
 
     @Test
-    public void testRelease() {
-        System.setProperty("io.netty.maxDirectMemory", "2147483648");
+    public void testA()
+    {
+//        System.setProperty("io.netty.maxDirectMemory", "2147483648");
 
         DirectByteBufPooledAllocator pool = ByteBufPoolManager
                 .getInstance()
@@ -44,10 +54,10 @@ public class ByteBufPoolReleaseTest
 
         Assert.assertEquals(pool.cacheSize(), 320);
 
-        WrappedAutoFlushByteBuf wByteBuf = pool.allocByteBuf();
+        WrappedAutoFlushByteBuf wByteBuf = pool.allocByteBuf(this.config.getMaxCapacity());
         Assert.assertTrue(wByteBuf.capacity() == pool.getConfigInitialCapacity());
         Assert.assertEquals(wByteBuf.writerIndex(), 0);
-        Assert.assertTrue(wByteBuf.maxCapacity() == pool.getConfigMaxCapacity());
+        Assert.assertTrue(wByteBuf.maxCapacity() == this.config.getMaxCapacity());
 
         for (int i = 0; i < 60; i++) {
             wByteBuf.writeByte(i);
@@ -55,17 +65,13 @@ public class ByteBufPoolReleaseTest
         Assert.assertTrue(wByteBuf.capacity() == pool.getConfigInitialCapacity());
         Assert.assertEquals(wByteBuf.writerIndex(), 60);
 
-        long max = pool.getConfigMaxCapacity() - 60 - 10;
+        long max = this.config.getMaxCapacity() - 60 - 10;
         for (int i = 0; i < max; i++) {
             wByteBuf.writeByte(i);
         }
         // 存在扩容
-        Assert.assertTrue(wByteBuf.capacity() == pool.getConfigMaxCapacity());
-        Assert.assertEquals(wByteBuf.writerIndex(), pool.getConfigMaxCapacity() -10);
-
-        if(isRelease){
-            wByteBuf.release();
-        }
+        Assert.assertTrue(wByteBuf.capacity() == this.config.getMaxCapacity());
+        Assert.assertEquals(wByteBuf.writerIndex(), this.config.getMaxCapacity() -10);
 
         // 500 多线程同时申请 buffer.
         ExecutorService executorService = new ThreadPoolExecutor(16,
@@ -73,7 +79,7 @@ public class ByteBufPoolReleaseTest
                 1,
                 TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>());
-        int size = 500;
+        int size = 1500;
         CountDownLatch countDownLatch = new CountDownLatch(size);
 
         /**
@@ -89,11 +95,13 @@ public class ByteBufPoolReleaseTest
             int finalI = i;
             executorService.submit(() -> {
                 try {
-                    final WrappedAutoFlushByteBuf wrappedByteBuf = pool.allocByteBuf();
+                    final WrappedAutoFlushByteBuf wrappedByteBuf = pool.allocByteBuf(
+                            this.config.getMaxCapacity()
+                    );
 
                     // 边写边读
                     Future futureWrite = CompletableFuture.runAsync(() -> {
-                        long max_ = pool.getConfigMaxCapacity();
+                        long max_ = this.config.getMaxCapacity();
                         for (int j = 0; j < max_; j++) {
                             wrappedByteBuf.writeByte(j);
                         }
@@ -117,10 +125,8 @@ public class ByteBufPoolReleaseTest
                             numDirectArenas, metric.numThreadLocalCaches(),
                             BytesUtil.byteToM(metric.usedDirectMemory()));
 
-                    if(isRelease){
-                        // 必须要 release， 否则堆外内存不会被释放！！！
-                        wrappedByteBuf.release();
-                    }
+                    // 16MB 的 byteBuf release
+                    wrappedByteBuf.release();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }finally {
@@ -162,4 +168,5 @@ public class ByteBufPoolReleaseTest
 
         log.info("执行结束!");
     }
+
 }
