@@ -9,6 +9,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>features</artifactId>
+    <artifactId>utils</artifactId>
+    <name>Common Utilities</name>
 
 </project>
