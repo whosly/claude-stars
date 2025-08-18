@@ -42,7 +42,7 @@ public class ChatsClient extends AbstractChatClient {
                 // 创建BufferedReader，用于读取控制台输入
                 BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-                // 连接成功后，先向服务器注册用户名
+                // 连接成功后，先向服务器注册用户名。 通过 channel 发送到服务器端
                 channel.writeAndFlush("/name " + chatClient.getClientName() + "\r\n");
 
                 // 循环读取控制台输入并发送到服务器

@@ -50,6 +50,7 @@ public class AbstractChatClient implements IClient {
             ChannelFuture future = bootstrap.connect(serverHost, serverPort).sync();
 
             if(consumer != null) {
+                // 得到channel
                 Channel channel = future.sync().channel();
                 consumer.accept(channel);
             }

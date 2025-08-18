@@ -11,6 +11,6 @@ import io.netty.channel.ChannelHandlerContext;
 public class ChatsClientHandler extends AbstractChatClientHandler {
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, String s) throws Exception {
-        System.out.println(s);
+        System.out.println(s.trim());
     }
 }
