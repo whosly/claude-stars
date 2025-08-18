@@ -23,8 +23,9 @@
 		<google.guava.version>32.1.2-jre</google.guava.version>
 		<hutool.version>5.6.1</hutool.version>
 		<netty.version>4.1.94.Final</netty.version>
+		<lombok.version>1.18.24</lombok.version>
 
-		<!-- test -->
+		<!-- test com.yueny.study.netty.application.client -->
 		<junit.version>5.11.2</junit.version>
 		<junit.jupiter.version>${junit.version}</junit.jupiter.version>
 		<mockito.version>4.11.0</mockito.version>
@@ -34,7 +35,8 @@
 	<modules>
 		<module>01.server-and-client</module>
 		<module>02.server-and-client-application</module>
-		<module>03.server-and-client-spring</module>
+		<module>03.handler-decoder</module>
+		<module>04.chat</module>
 		<!-- NETTY内存分配器类 -->
 		<module>06.netty-capacity</module>
 
@@ -49,6 +51,11 @@
 				<version>${netty.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
