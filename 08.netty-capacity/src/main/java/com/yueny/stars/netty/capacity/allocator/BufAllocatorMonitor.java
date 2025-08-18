@@ -52,7 +52,7 @@ public class BufAllocatorMonitor
 
     class ConnectionBufAllocatorMontorRunner
             implements Runnable {
-        private static Logger logger = LoggerFactory.getLogger(ConnectionBufAllocatorMontorRunner.class);
+        private Logger logger = LoggerFactory.getLogger(ConnectionBufAllocatorMontorRunner.class);
 
         private final IDirectByteBufPooledAllocator allocatorManager;
         private final BufAllocatorMonitor monitor;
