@@ -33,7 +33,10 @@ public class DecoderServer {
                                     new ResponseDataEncoder(),
                                     new SimpleProcessingHandler());
                         }
-                    }).option(ChannelOption.SO_BACKLOG, 128)
+                    })
+                    //设置队列大小
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    // 两小时内没有数据的通信时,TCP会自动发送一个活动探测数据报文
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
             ChannelFuture future = bootstrap.bind().sync();
