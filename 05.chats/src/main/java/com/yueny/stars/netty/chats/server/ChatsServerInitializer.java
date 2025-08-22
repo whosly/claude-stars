@@ -1,12 +1,9 @@
 package com.yueny.stars.netty.chats.server;
 
+import com.yueny.stars.netty.monitor.agent.NettyMonitorAgent;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.Delimiters;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 
 /**
  * ChannelInitializer是一个用于初始化新创建的Channel的类。在这里，它被用来设置几个自定义的处理器和编解码器
@@ -30,6 +27,11 @@ class ChatsServerInitializer extends ChannelInitializer<SocketChannel> {
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         // 获取Channel的pipeline
         ChannelPipeline pipeline = socketChannel.pipeline();
+
+        // 添加监控Handler（必须在最前面）
+        if (NettyMonitorAgent.isInitialized()) {
+            pipeline.addFirst("monitor", NettyMonitorAgent.getMonitorHandler());
+        }
 
         // 添加自定义的Message编解码器
         pipeline.addLast(new com.yueny.stars.netty.chats.codec.MessageDecoder());

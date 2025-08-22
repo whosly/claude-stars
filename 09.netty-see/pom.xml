@@ -10,44 +10,16 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>09.netty-see</artifactId>
-	<description>NETTY 可视化</description>
+	<packaging>pom</packaging>
+	<description>NETTY 可视化监控系统</description>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.yueny.study</groupId>
-			<artifactId>core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+	<modules>
+		<module>agent</module>
+		<module>console</module>
+	</modules>
 
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-all</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-		</dependency>
-
-		<!-- test  -->
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+	<properties>
+		<spring.boot.version>2.5.15</spring.boot.version>
+	</properties>
 
 </project>

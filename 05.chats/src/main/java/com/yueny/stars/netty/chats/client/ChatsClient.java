@@ -3,6 +3,8 @@ package com.yueny.stars.netty.chats.client;
 import com.yueny.stars.netty.chats.ConfigLoader;
 import com.yueny.stars.netty.chats.Message;
 import com.yueny.stars.netty.core.socket.client.AbstractChatClient;
+import com.yueny.stars.netty.monitor.agent.NettyMonitorAgent;
+import com.yueny.stars.netty.monitor.agent.annotation.NettyMonitor;
 import io.netty.channel.Channel;
 
 import java.io.BufferedReader;
@@ -16,6 +18,7 @@ import java.util.function.Consumer;
  * @date 2025-08-18 17:03:50
  * @description
  */
+@NettyMonitor(applicationName = "ChatsClient", port = 19999)
 public class ChatsClient extends AbstractChatClient {
     private static final String HOST = ConfigLoader.getServerHost();
     private static final int PORT = ConfigLoader.getServerPort();
@@ -35,6 +38,11 @@ public class ChatsClient extends AbstractChatClient {
             clientName = scanner.nextLine();
             System.out.println("Welcome " + clientName);
         }
+        // 不要关闭scanner，因为我们后面还需要使用System.in
+
+        // 通过注解启用监控（使用用户名作为应用名称）
+        NettyMonitorAgent.initialize("ChatsClient-" + clientName);
+        System.out.println("监控代理已启用，应用名称: ChatsClient-" + clientName);
 
         ChatsClient chatClient = new ChatsClient(clientName);
         chatClient.start(HOST, PORT, new ChatsClientInitializer(), new Consumer<Channel>() {

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netty Visualizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .dashboard-card {
+            transition: transform 0.2s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-network-wired"></i> Netty Visualizer
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/channels">Channels</a>
+                <a class="nav-link" href="/eventloops">Event Loops</a>
+                <a class="nav-link" href="/performance">Performance</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">Netty 可视化监控面板</h1>
+            </div>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card metric-card dashboard-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-plug fa-3x mb-3"></i>
+                        <div class="metric-value" id="totalChannels">0</div>
+                        <div>总连接数</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card metric-card dashboard-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-heartbeat fa-3x mb-3"></i>
+                        <div class="metric-value" id="activeChannels">0</div>
+                        <div>活跃连接</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card metric-card dashboard-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-cogs fa-3x mb-3"></i>
+                        <div class="metric-value" id="eventLoops">0</div>
+                        <div>事件循环</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能卡片 -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card dashboard-card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-list"></i> Channel 管理</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">查看和管理所有 Netty Channel 连接，包括连接状态、地址信息、数据传输统计等。</p>
+                        <a href="/channels" class="btn btn-primary">查看 Channels</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card dashboard-card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-sync-alt"></i> Event Loop 监控</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">监控 EventLoop 的运行状态，包括线程使用情况、任务队列、CPU 使用率等。</p>
+                        <a href="/eventloops" class="btn btn-success">查看 Event Loops</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card dashboard-card h-100">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-line"></i> 性能分析</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">实时性能监控图表，包括吞吐量、延迟、内存使用等关键指标。</p>
+                        <a href="/performance" class="btn btn-warning">查看性能</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card dashboard-card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-memory"></i> 缓冲区监控</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">监控 ByteBuf 的使用情况，包括容量、读写索引、引用计数等。</p>
+                        <button class="btn btn-info" onclick="showBufferInfo()">查看缓冲区</button>
+                        <button class="btn btn-success ms-2" onclick="createTestConnections()">创建测试连接</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实时日志 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-terminal"></i> 实时日志</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="logContainer" style="height: 300px; overflow-y: auto; background-color: #f8f9fa; padding: 10px; font-family: monospace;">
+                            <div class="text-muted">等待日志数据...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // WebSocket连接
+        let ws;
+        
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/netty-data`;
+            
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                addLog('WebSocket连接已建立');
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                updateDashboard(data);
+            };
+            
+            ws.onclose = function() {
+                addLog('WebSocket连接已关闭，5秒后重连...');
+                setTimeout(connectWebSocket, 5000);
+            };
+            
+            ws.onerror = function(error) {
+                addLog('WebSocket错误: ' + error);
+            };
+        }
+        
+        function updateDashboard(data) {
+            // 更新统计数据
+            if (data.stats) {
+                document.getElementById('totalChannels').textContent = data.stats.totalChannels || 0;
+                document.getElementById('activeChannels').textContent = data.stats.activeChannels || 0;
+                document.getElementById('eventLoops').textContent = data.stats.eventLoops || 0;
+            }
+        }
+        
+        function addLog(message) {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span class="text-muted">[${timestamp}]</span> ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        function showBufferInfo() {
+            // 这里可以添加显示缓冲区信息的逻辑
+            alert('缓冲区信息功能开发中...');
+        }
+        
+        function createTestConnections() {
+            fetch('/api/netty/test/connections', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addLog('提示: ' + data.message);
+                        addLog('说明: ' + data.instruction);
+                        alert('请使用以下命令创建测试连接:\n\ntelnet localhost 9999\n\n或者运行TestClient类');
+                    } else {
+                        addLog('错误: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('创建测试连接失败:', error);
+                    addLog('创建测试连接失败: ' + error);
+                });
+        }
+        
+        // 定期获取统计数据
+        function fetchStats() {
+            fetch('/api/netty/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalChannels').textContent = data.totalChannels || 0;
+                    document.getElementById('activeChannels').textContent = data.activeChannels || 0;
+                    document.getElementById('eventLoops').textContent = data.eventLoops || 0;
+                })
+                .catch(error => {
+                    console.error('获取统计数据失败:', error);
+                });
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            connectWebSocket();
+            fetchStats();
+            setInterval(fetchStats, 5000); // 每5秒更新一次统计数据
+        });
+    </script>
+</body>
+</html>
