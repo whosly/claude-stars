@@ -1,6 +1,7 @@
 package com.yueny.stars.netty.chats.client;
 
 import com.yueny.stars.netty.chats.ConfigLoader;
+import com.yueny.stars.netty.chats.Message;
 import com.yueny.stars.netty.core.socket.client.AbstractChatClient;
 import io.netty.channel.Channel;
 
@@ -43,12 +44,12 @@ public class ChatsClient extends AbstractChatClient {
                 BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
                 // 连接成功后，先向服务器注册用户名。 通过 channel 发送到服务器端
-                channel.writeAndFlush("/name " + chatClient.getClientName() + "\r\n");
+                channel.writeAndFlush(new Message("/name " + chatClient.getClientName()));
 
                 // 循环读取控制台输入并发送到服务器
                 while (true) {
                     try {
-                        channel.writeAndFlush(in.readLine() + "\r\n");
+                        channel.writeAndFlush(new Message(in.readLine()));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

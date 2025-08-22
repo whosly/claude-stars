@@ -102,13 +102,39 @@ Build an Echo Server and Client Netty Application， 手册：[Echo Server and C
 Encoders and Decoders for RequestData
 
 ### 04.chat
-Chat Server-Client application using Netty， 手册：[Chat Server-Client application using Netty](./04.chat/Usage.md)
+Chat Server-Client application using Netty， 手册：[Chat Server-Client application using Netty](./04.chat/README.md)
 
 ### 05.chats
-聊天室项目，实现多为用户(client)的互通互撩，以用户名的形式呈现， 手册：[Chats](./05.chats/Read.md)
+聊天室项目，实现多为用户(client)的互通互撩，以用户名的形式呈现， 手册：[Chats](./05.chats/README.md)
 
-### 06.netty-capacity
-NETTY内存分配器类
+### 06.netty-buffer
+
+[netty-buffer](./06.netty-buffer/README.md)
+
+Netty 提供了 ByteBuf 作为它的字节容器，既解决了 JDK API 的局限性，又为网络应用程序提供了更好的 API，ByteBuf 的优点：
+* 可以被用户自定义的缓冲区类型扩展
+* 通过内置的复合缓冲区类型实现了透明的零拷贝
+* 容量可以按需增长
+* 在读和写这两种模式之间切换不需要调用 ByteBuffer 的 flip()方法
+* 读和写使用了不同的索引
+* 支持方法的链式调用
+* 支持引用计数
+* 支持池化
+
+### 07.netty-channel
+NETTY Channel（通道） [netty-channel](./07.netty-channel/README.md)
+
+### 08.selector
+Java的NIO中，Selector用于非阻塞IO，能用一个线程处理多个客户端连接。
+Selector可以检测多个注册的Channel上的事件，减少系统开销，避免多线程上下文切换。 Selector的关键方法包括open()、select()等。
+
+1. Java的NIO，用非阻塞的IO方式，可以用一个线程，处理多个的客户端连接，就会使用到Selector（选择器）； 
+2. Selector能够检测多个注册的通道上是否有事件发生（注意：多个Channel以事件的方式可以注册到同一个Selector），如果有事件发生，便获取事件然后针对每个事件进行相应的处理。这样就可以只用一个单线程去管理多个通道，也就是管理多个连接和请求； 
+3. 只有在连接真正有读写事件发生时，才会进行读写，就大大地减少了系统开销，并且不必为每个连接都创建一个线程，不用去维护多个线程； 
+4. 避免了多线程之间的上下文切换导致的开销。
+
+
+### 11.netty-capacity
 
 
 ## Build

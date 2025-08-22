@@ -25,20 +25,15 @@ import io.netty.handler.codec.string.StringEncoder;
  * @date 2025-08-18 16:38:55
  * @description
  */
-public class ChatsServerInitializer extends ChannelInitializer<SocketChannel> {
+class ChatsServerInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         // 获取Channel的pipeline
         ChannelPipeline pipeline = socketChannel.pipeline();
 
-        // 添加一个基于分隔符的帧解码器，这里使用换行符作为消息的分隔符，最大帧长度为8192字节
-        pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-
-        // 添加一个字符串解码器，将字节解码为字符串
-        pipeline.addLast(new StringDecoder());
-
-        // 添加一个字符串编码器，将字符串编码为字节
-        pipeline.addLast(new StringEncoder());
+        // 添加自定义的Message编解码器
+        pipeline.addLast(new com.yueny.stars.netty.chats.codec.MessageDecoder());
+        pipeline.addLast(new com.yueny.stars.netty.chats.codec.MessageEncoder());
 
         // 添加自定义的服务器处理器到pipeline
         pipeline.addLast(new ChatsServerHandler());

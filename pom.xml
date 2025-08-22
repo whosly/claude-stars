@@ -39,8 +39,11 @@
 		<module>04.chat</module>
 		<module>05.chats</module>
 		<module>06.netty-buffer</module>
-		<!-- NETTY内存分配器类 -->
-		<module>08.netty-capacity</module>
+		<module>07.netty-channel</module>
+		<!-- Netty 可视化项目 -->
+<!--		<module>09.netty-see</module>-->
+		<!-- Netty 内存分配器类 -->
+		<module>11.netty-capacity</module>
 		<!-- https://juejin.cn/post/7232905822278729783?from=search-suggest -->
 		<!--		<module>05.web-socket</module>-->
 
@@ -53,6 +56,28 @@
 			<dependency>
 				<groupId>io.netty</groupId>
 				<artifactId>netty-all</artifactId>
+				<version>${netty.version}</version>
+			</dependency>
+
+			<!-- Unix Domain Socket (Linux/macOS) 本地域套接字支持 -->
+			<!-- Linux x86_64 -->
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-transport-native-epoll</artifactId>
+				<classifier>linux-x86_64</classifier>
+				<version>${netty.version}</version>
+			</dependency>
+			<!-- Linux aarch64 -->
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-transport-native-epoll</artifactId>
+				<classifier>linux-aarch_64</classifier>
+				<version>${netty.version}</version>
+			</dependency>
+			<!-- macOS kqueue -->
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-transport-native-kqueue</artifactId>
 				<version>${netty.version}</version>
 			</dependency>
 

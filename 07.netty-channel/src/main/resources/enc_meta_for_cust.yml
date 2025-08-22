@@ -1,0 +1,771 @@
+schemas:
+  - schema: test
+    tables:
+    - name: authors
+      columns:
+        - name: author_id
+          dataType: String
+        - name: author_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: nationality
+          dataType: String
+          enc: true
+          algo: 4
+        - name: book_count
+          dataType: String
+        - name: average_book_price
+          dataType: String
+          enc: true
+          algo: 4
+    - name: book_authors
+      columns:
+        - name: id
+          dataType: String
+          enc: true
+          algo: 4
+        - name: book_id
+          dataType: String
+          enc: true
+          algo: 4
+        - name: author_id
+          dataType: String
+    - name: books
+      columns:
+        - name: book_id
+          dataType: String
+          enc: true
+          algo: 4
+        - name: title
+          dataType: String
+          enc: true
+          algo: 4
+        - name: author
+          dataType: String
+        - name: publisher_id
+          dataType: String
+        - name: price
+          dataType: String
+        - name: publication_year
+          dataType: String
+        - name: total_sales_amount
+          dataType: String
+        - name: total_authors
+          dataType: String
+    - name: courses
+      columns:
+        - name: course_id
+          dataType: String
+        - name: course_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: course_fee
+          dataType: String
+        - name: duration
+          dataType: String
+    - name: courses1
+      columns:
+        - name: id
+          dataType: String
+        - name: student_name
+          dataType: String
+        - name: major
+          dataType: String
+        - name: college_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: grade
+          dataType: String
+          enc: true
+          algo: 4
+        - name: advisor_name
+          dataType: String
+          enc: true
+          algo: 4
+    - name: courses2
+      columns:
+        - name: id
+          dataType: String
+        - name: student_name
+          dataType: String
+        - name: major
+          dataType: String
+          enc: true
+          algo: 4
+        - name: college_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: grade
+          dataType: String
+        - name: advisor_name
+          dataType: String
+          enc: true
+          algo: 4
+    - name: customers
+      columns:
+        - name: customer_id
+          dataType: String
+        - name: name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: city
+          dataType: String
+          enc: true
+          algo: 4
+        - name: total_spent
+          dataType: String
+    - name: customers_delete
+      columns:
+        - name: customer_id
+          dataType: String
+        - name: name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: city
+          dataType: String
+          enc: true
+          algo: 4
+    - name: delete_table
+      columns:
+        - name: id
+          dataType: String
+        - name: first_name
+          dataType: String
+        - name: last_name
+          dataType: String
+        - name: email
+          dataType: String
+          enc: true
+          algo: 4
+        - name: address
+          dataType: String
+          enc: true
+          algo: 4
+        - name: city
+          dataType: String
+          enc: true
+          algo: 4
+    - name: employees
+      columns:
+        - name: employee_id
+          dataType: String
+        - name: name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: salary
+          dataType: String
+        - name: grade_E
+          dataType: String
+          enc: true
+          algo: 4
+        - name: grade_M
+          dataType: String
+        - name: department
+          dataType: String
+          enc: true
+          algo: 4
+        - name: age
+          dataType: String
+    - name: example_table_a
+      columns:
+        - name: first_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: last_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: email
+          dataType: String
+          enc: true
+          algo: 4
+        - name: address
+          dataType: String
+          enc: true
+          algo: 4
+    - name: example_table_b
+      columns:
+        - name: first_name
+          dataType: String
+        - name: last_name
+          dataType: String
+        - name: email
+          dataType: String
+          enc: true
+          algo: 4
+        - name: address
+          dataType: String
+          enc: true
+          algo: 4
+    - name: example_table_c
+      columns:
+        - name: first_name
+          dataType: String
+        - name: last_name
+          dataType: String
+        - name: email
+          dataType: String
+        - name: address
+          dataType: String
+    - name: example_table_d
+      columns:
+        - name: first_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: last_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: email
+          dataType: String
+          enc: true
+          algo: 4
+        - name: address
+          dataType: String
+          enc: true
+          algo: 4
+    - name: example_table_e
+      columns:
+        - name: first_name
+          dataType: String
+        - name: last_name
+          dataType: String
+        - name: email
+          dataType: String
+        - name: address
+          dataType: String
+    - name: high_value_customers
+      columns:
+        - name: customer_id
+          dataType: String
+        - name: name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: city
+          dataType: String
+          enc: true
+          algo: 4
+        - name: total_spent
+          dataType: String
+    - name: math_operations
+      columns:
+        - name: id
+          dataType: String
+        - name: num1
+          dataType: String
+        - name: num2
+          dataType: String
+    - name: merged_table
+      columns:
+        - name: book_id
+          dataType: String
+          enc: true
+          algo: 4
+        - name: title
+          dataType: String
+          enc: true
+          algo: 4
+        - name: price
+          dataType: String
+          enc: true
+          algo: 4
+        - name: author
+          dataType: String
+          enc: true
+          algo: 4
+        - name: publication_year
+          dataType: String
+        - name: publisher_id
+          dataType: String
+          enc: true
+          algo: 4
+        - name: publisher_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: city
+          dataType: String
+          enc: true
+          algo: 4
+        - name: author_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: nationality
+          dataType: String
+          enc: true
+          algo: 4
+        - name: total_sales
+          dataType: String
+        - name: average_price
+          dataType: String
+        - name: max_price
+          dataType: String
+        - name: min_price
+          dataType: String
+        - name: total_books
+          dataType: String
+        - name: distinct_books
+          dataType: String
+        - name: distinct_title_count
+          dataType: String
+        - name: total_price
+          dataType: String
+        - name: book_count
+          dataType: String
+        - name: short_title
+          dataType: String
+          enc: true
+          algo: 4
+        - name: future_publication_date
+          dataType: Date
+        - name: adjusted_price
+          dataType: String
+        - name: discounted_price
+          dataType: String
+        - name: premium_price
+          dataType: String
+        - name: price_per_letter
+          dataType: String
+        - name: price_category
+          dataType: String
+          enc: true
+          algo: 4
+        - name: formatted_info
+          dataType: String
+          enc: true
+          algo: 4
+        - name: price_ratio
+          dataType: String
+        - name: price_status
+          dataType: String
+          enc: true
+          algo: 4
+        - name: customer_id
+          dataType: String
+        - name: name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: total_spent
+          dataType: String
+        - name: average_spent
+          dataType: String
+        - name: purchase_count
+          dataType: String
+        - name: order_id
+          dataType: String
+        - name: order_date
+          dataType: Date
+        - name: quantity
+          dataType: String
+        - name: combined_value
+          dataType: String
+          enc: true
+          algo: 4
+        - name: student_name
+          dataType: String
+          enc: true
+          algo: 4
+    - name: my table
+      columns:
+        - name: first-name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: last.name
+          dataType: String
+    - name: products
+      columns:
+        - name: product_id
+          dataType: String
+        - name: number
+          dataType: String
+          enc: true
+          algo: 4
+        - name: category
+          dataType: String
+        - name: price
+          dataType: String
+        - name: quantity
+          dataType: String
+        - name: product_name
+          dataType: String
+          enc: true
+          algo: 4
+    - name: publishers
+      columns:
+        - name: publisher_id
+          dataType: String
+          enc: true
+          algo: 4
+        - name: publisher_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: city
+          dataType: String
+        - name: parent_publisher_id
+          dataType: String
+    - name: refined_ecommerce_product_data
+      columns:
+        - name: Product_ID
+          dataType: String
+          enc: true
+          algo: 4
+        - name: Product_Name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: Category
+          dataType: String
+          enc: true
+          algo: 4
+        - name: Sub_Category
+          dataType: String
+          enc: true
+          algo: 4
+        - name: Price
+          dataType: String
+        - name: Customer_Age
+          dataType: String
+        - name: Customer_Gender
+          dataType: String
+          enc: true
+          algo: 4
+        - name: Purchase_History
+          dataType: String
+        - name: Review_Rating
+          dataType: String
+        - name: Review_Sentiment
+          dataType: String
+          enc: true
+          algo: 4
+    - name: sales
+      columns:
+        - name: id
+          dataType: String
+        - name: salesperson
+          dataType: String
+          enc: true
+          algo: 4
+        - name: amount
+          dataType: String
+        - name: grade_E
+          dataType: String
+          enc: true
+          algo: 4
+        - name: grade_M
+          dataType: String
+        - name: region
+          dataType: String
+    - name: student_book_relation
+      columns:
+        - name: student_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: book_id
+          dataType: String
+          enc: true
+          algo: 4
+    - name: students
+      columns:
+        - name: student_id
+          dataType: String
+          enc: true
+          algo: 4
+        - name: student_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: teacher_id
+          dataType: String
+    - name: teachers
+      columns:
+        - name: teacher_id
+          dataType: String
+        - name: teacher_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: qualification
+          dataType: String
+          enc: true
+          algo: 4
+        - name: contact_email
+          dataType: String
+          enc: true
+          algo: 4
+    - name: test_data_types
+      columns:
+        - name: id
+          dataType: String
+        - name: tinyint_col
+          dataType: Integer
+        - name: smallint_col
+          dataType: String
+        - name: mediumint_col
+          dataType: String
+        - name: int_col
+          dataType: String
+        - name: bigint_col
+          dataType: Long
+        - name: float_col
+          dataType: String
+        - name: double_col
+          dataType: String
+        - name: decimal_col
+          dataType: String
+        - name: char_col
+          dataType: String
+          enc: true
+          algo: 4
+        - name: varchar_col
+          dataType: String
+          enc: true
+          algo: 4
+        - name: text_col
+          dataType: String
+          enc: true
+          algo: 4
+        - name: date_col
+          dataType: Date
+        - name: time_col
+          dataType: String
+        - name: datetime_col
+          dataType: Date
+        - name: timestamp_col
+          dataType: String
+        - name: binary_col
+          dataType: String
+        - name: json_col
+          dataType: String
+    - name: update_customers
+      columns:
+        - name: customer_id
+          dataType: String
+        - name: first_name
+          dataType: String
+        - name: last_name
+          dataType: String
+        - name: email
+          dataType: String
+          enc: true
+          algo: 4
+        - name: city
+          dataType: String
+          enc: true
+          algo: 4
+    - name: update_employees
+      columns:
+        - name: id
+          dataType: String
+        - name: first_name
+          dataType: String
+        - name: last_name
+          dataType: String
+        - name: email
+          dataType: String
+          enc: true
+          algo: 4
+        - name: department
+          dataType: String
+          enc: true
+          algo: 4
+    - name: user_data
+      columns:
+        - name: id
+          dataType: String
+        - name: chinese_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: english_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: nickname
+          dataType: String
+        - name: gender
+          dataType: String
+        - name: age
+          dataType: String
+        - name: phone_number
+          dataType: String
+          enc: true
+          algo: 4
+        - name: address
+          dataType: String
+          enc: true
+          algo: 4
+        - name: email
+          dataType: String
+          enc: true
+          algo: 4
+        - name: birthday
+          dataType: String
+          enc: true
+          algo: 4
+        - name: hometown
+          dataType: String
+        - name: company
+          dataType: String
+          enc: true
+          algo: 4
+    - name: users
+      columns:
+        - name: id
+          dataType: String
+        - name: username
+          dataType: String
+          enc: true
+          algo: 4
+        - name: email
+          dataType: String
+        - name: first_name
+          dataType: String
+          enc: true
+          algo: 4
+        - name: last_name
+          dataType: String
+        - name: created_at
+          dataType: String
+    - name: users_copy
+      columns:
+        - name: id
+          dataType: String
+        - name: username
+          dataType: String
+          enc: true
+          algo: 4
+        - name: email
+          dataType: String
+          enc: true
+          algo: 4
+        - name: first_name
+          dataType: String
+        - name: last_name
+          dataType: String
+        - name: created_at
+          dataType: String
+    - name: course_teachers
+      columns:
+        - name: id
+          dataType: String
+        - name: course_id
+          dataType: String
+        - name: teacher_id
+          dataType: String
+    - name: orders
+      columns:
+        - name: order_id
+          dataType: String
+        - name: customer_id
+          dataType: String
+        - name: order_date
+          dataType: Date
+        - name: total_amount
+          dataType: String
+    - name: update_orders
+      columns:
+        - name: order_id
+          dataType: String
+        - name: customer_id
+          dataType: String
+        - name: order_date
+          dataType: Date
+        - name: total_amount
+          dataType: String
+        - name: status
+          dataType: String
+          enc: true
+          algo: 4
+    - name: scores
+      columns:
+        - name: score_id
+          dataType: String
+        - name: student_id
+          dataType: String
+        - name: course_id
+          dataType: String
+        - name: score
+          dataType: String
+    - name: order_items
+      columns:
+        - name: order_item_id
+          dataType: String
+        - name: order_id
+          dataType: String
+        - name: chinese_name
+          dataType: String
+        - name: quantity
+          dataType: String
+        - name: age
+          dataType: String
+        - name: customer_id
+          dataType: String
+        - name: book_id
+          dataType: String
+          enc: true
+          algo: 4
+  - schema: 1tet
+    tables:
+      - name: user_data
+        columns:
+          - name: id
+            dataType: String
+          - name: chinese_name
+            dataType: String
+            enc: true
+            algo: 4
+          - name: english_name
+            dataType: String
+            enc: true
+            algo: 4
+          - name: nickname
+            dataType: String
+          - name: gender
+            dataType: String
+          - name: age
+            dataType: String
+          - name: phone_number
+            dataType: String
+            enc: true
+            algo: 4
+          - name: address
+            dataType: String
+            enc: true
+            algo: 4
+          - name: email
+            dataType: String
+            enc: true
+            algo: 4
+          - name: birthday
+            dataType: String
+            enc: true
+            algo: 4
+          - name: hometown
+            dataType: String
+          - name: company
+            dataType: String
+            enc: true
+            algo: 4
+
+
+
+
+
+host: just for demo
+port: oh~
+

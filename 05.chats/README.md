@@ -1,6 +1,6 @@
 # Chats
 
-chats 是一个基于 Netty 的轻量级群聊示例，支持多人聊天室、昵称显示与基本的系统提示，适合学习 Netty 的编解码、Pipeline、ChannelGroup 及简单协议设计。
+chats 是一个基于 Netty 的轻量级群聊示例，支持多人聊天室、昵称显示与基本的系统提示，使用自定义数据结构 `com.yueny.stars.netty.chats.Message`。
 
 ## 功能与特色
 * 昵称显示: 显示为【昵称】而非【IP】，自己发送显示为【you】。

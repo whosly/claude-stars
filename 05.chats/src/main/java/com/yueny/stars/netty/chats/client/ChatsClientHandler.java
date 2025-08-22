@@ -1,5 +1,6 @@
 package com.yueny.stars.netty.chats.client;
 
+import com.yueny.stars.netty.chats.Message;
 import com.yueny.stars.netty.core.socket.client.AbstractChatClientHandler;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -8,9 +9,9 @@ import io.netty.channel.ChannelHandlerContext;
  * @date 2025-08-18 17:02:58
  * @description
  */
-public class ChatsClientHandler extends AbstractChatClientHandler {
+class ChatsClientHandler extends AbstractChatClientHandler<Message> {
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, String s) throws Exception {
-        System.out.println(s.trim());
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, Message msg) throws Exception {
+        System.out.println(msg.getMessage());
     }
 }

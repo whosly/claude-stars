@@ -1,5 +1,6 @@
 package com.yueny.stars.netty.chats.server;
 
+import com.yueny.stars.netty.chats.Message;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -19,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2025-08-18 16:36:45
  * @description
  */
-public class ChatsServerHandler extends SimpleChannelInboundHandler<String> {
+class ChatsServerHandler extends SimpleChannelInboundHandler<Message> {
     // 定义一个ChannelGroup来保存所有连接的Channel，管理所有的 channel
     // GlobalEventExecutor.INSTANCE 是全局的事件执行器，是一个单例
     public static ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
@@ -46,7 +47,7 @@ public class ChatsServerHandler extends SimpleChannelInboundHandler<String> {
         // 将该客户加入聊天的信息推送到给其他在线的客户端
         // 该方法会将 channelGroup 中所有的 channel 遍历，并发送消息，不需要自己遍历
         // 当handler被添加到pipeline时，发送加入消息给所有Channel
-        channels.writeAndFlush("【Server】 - " + getDisplayName(incoming) + " 加入聊天 " + simpleDateFormat.format(new Date()) + "\n");
+        channels.writeAndFlush(new Message("【Server】 - " + getDisplayName(incoming) + " 加入聊天 " + simpleDateFormat.format(new Date())));
         // 将当前Channel添加到ChannelGroup中
         channels.add(ctx.channel());
     }
@@ -60,7 +61,7 @@ public class ChatsServerHandler extends SimpleChannelInboundHandler<String> {
     public void handlerRemoved(ChannelHandlerContext ctx) {
         Channel incoming = ctx.channel();
         // 当handler从pipeline移除时，发送离开消息给所有Channel
-        channels.writeAndFlush("【Server】 - " + getDisplayName(incoming) + " 离线了~~~\\n");
+        channels.writeAndFlush(new Message("【Server】 - " + getDisplayName(incoming) + " 离线了~~~"));
         // 清理用户名映射
         channelToUsername.remove(incoming);
     }
@@ -69,20 +70,20 @@ public class ChatsServerHandler extends SimpleChannelInboundHandler<String> {
      * 每当从服务端读到客户端写入信息时，将信息转发给其他客户端的 Channel。其中如果你使用的是 Netty 5.x 版本时，需要把 channelRead0() 重命名为messageReceived()
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
         // 获取到当前 channel
         Channel incoming = ctx.channel();
 
-        String trimmed = msg == null ? "" : msg.trim();
+        String trimmed = msg == null ? "" : msg.getMessage().trim();
 
         // 处理改名命令：/name 新用户名
         if (trimmed.startsWith("/name ")) {
             String newName = trimmed.substring(6).trim();
             if (newName.isEmpty()) {
-                incoming.writeAndFlush("用户名不能为空\n");
+                incoming.writeAndFlush(new Message("用户名不能为空"));
             } else {
                 channelToUsername.put(incoming, newName);
-                incoming.writeAndFlush("昵称已更新为：" + newName + "\n");
+                incoming.writeAndFlush(new Message("昵称已更新为：" + newName));
             }
             return;
         }
@@ -91,10 +92,10 @@ public class ChatsServerHandler extends SimpleChannelInboundHandler<String> {
         for (Channel channel : channels) {
             if (channel != incoming) {
                 // 不是当前的 channel，直接转发消息，将消息发送给其他Channel，显示为来自incoming Channel
-                channel.writeAndFlush("【" + getDisplayName(incoming) + "】" + msg + "\n");
+                channel.writeAndFlush(new Message("【" + getDisplayName(incoming) + "】" + msg.getMessage()));
             } else {
                 // 如果是当前Channel，标记消息为"you"
-                channel.writeAndFlush("【you】" + msg + "\n");
+                channel.writeAndFlush(new Message("【you】" + msg.getMessage()));
             }
         }
     }

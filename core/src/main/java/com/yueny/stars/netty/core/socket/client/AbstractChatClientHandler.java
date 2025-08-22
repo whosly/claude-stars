@@ -7,13 +7,14 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * @author fengyang
  * @date 2025-08-18 14:32:56
  * @description
+ * @param <T>  交互的数据类型
  */
-public class AbstractChatClientHandler extends SimpleChannelInboundHandler<String> {
+public class AbstractChatClientHandler<T> extends SimpleChannelInboundHandler<T> {
     /**
      * Print chat message received from server.
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, T msg) throws Exception {
         System.out.println("Message: " + msg);
     }
 
