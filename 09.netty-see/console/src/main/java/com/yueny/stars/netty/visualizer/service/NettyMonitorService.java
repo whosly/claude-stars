@@ -6,11 +6,12 @@ import com.yueny.stars.netty.visualizer.model.BufferInfo;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -43,6 +44,10 @@ public class NettyMonitorService {
     
     // 定时清理任务
     private final ScheduledExecutorService cleanupExecutor = Executors.newSingleThreadScheduledExecutor();
+    
+    // 错误统计服务 - 使用可选依赖避免启动问题
+    @Autowired(required = false)
+    private ErrorStatsService errorStatsService;
     
     /**
      * 注册Channel进行监控
@@ -271,6 +276,8 @@ public class NettyMonitorService {
             channelStats.put(channelInfo.getChannelId(), channelInfo);
             log.info("Channel registered for monitoring: {} from {}", 
                     channelInfo.getChannelId(), channelInfo.getApplicationName());
+            System.out.println("💾 NettyMonitorService: Stored channel: " + channelInfo.getChannelId() + 
+                    " from " + channelInfo.getApplicationName() + " (Total: " + channelStats.size() + ")");
         }
     }
     
@@ -282,6 +289,67 @@ public class NettyMonitorService {
             channelStats.put(channelInfo.getChannelId(), channelInfo);
             log.debug("Channel info updated: {}", channelInfo.getChannelId());
         }
+    }
+    
+    /**
+     * 处理Channel异常事件
+     */
+    public void handleChannelException(ChannelInfo channelInfo) {
+        if (channelInfo != null && channelInfo.getErrorMessage() != null) {
+            // 创建异常对象用于统计
+            Exception exception = new Exception(channelInfo.getErrorMessage());
+            if (channelInfo.getErrorType() != null) {
+                try {
+                    Class<?> exceptionClass = Class.forName("java.lang." + channelInfo.getErrorType());
+                    if (Exception.class.isAssignableFrom(exceptionClass)) {
+                        exception = (Exception) exceptionClass.getConstructor(String.class)
+                                .newInstance(channelInfo.getErrorMessage());
+                    }
+                } catch (Exception e) {
+                    // 使用默认异常
+                }
+            }
+            
+            // 记录到错误统计服务
+            if (errorStatsService != null) {
+                errorStatsService.recordException(
+                        channelInfo.getChannelId(),
+                        getApplicationNameFromChannel(channelInfo.getChannelId()),
+                        exception,
+                        channelInfo.getRemoteAddress(),
+                        channelInfo.getLocalAddress()
+                );
+            }
+            
+            log.warn("Channel exception recorded: {} - {}", 
+                    channelInfo.getChannelId(), channelInfo.getErrorMessage());
+        }
+    }
+    
+    /**
+     * 记录成功的Channel操作
+     */
+    public void recordChannelSuccess(String channelId) {
+        if (errorStatsService != null) {
+            errorStatsService.recordSuccess(channelId, getApplicationNameFromChannel(channelId));
+        }
+    }
+    
+    /**
+     * 记录Channel请求
+     */
+    public void recordChannelRequest(String channelId) {
+        if (errorStatsService != null) {
+            errorStatsService.recordRequest(channelId, getApplicationNameFromChannel(channelId));
+        }
+    }
+    
+    /**
+     * 从Channel ID获取应用名称
+     */
+    private String getApplicationNameFromChannel(String channelId) {
+        ChannelInfo info = channelStats.get(channelId);
+        return info != null ? info.getApplicationName() : "Unknown";
     }
     
     /**

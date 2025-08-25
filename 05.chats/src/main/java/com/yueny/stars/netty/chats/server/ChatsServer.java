@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  * @date 2025-08-18 16:57:49
  * @description
  */
-@NettyMonitor(applicationName = "ChatsServer", port = 19999)
+@NettyMonitor(applicationName = "ChatsServer-${server.port}")
 public class ChatsServer extends AbstractChatServer {
     public static final ChatsServer INSTANCE = new ChatsServer();
 
@@ -34,9 +34,9 @@ public class ChatsServer extends AbstractChatServer {
     }
 
     public static void main(String[] args) throws Exception {
-        // 通过注解启用监控
-        NettyMonitorAgent.enableMonitoring(ChatsServer.class);
-        System.out.println("监控代理已通过注解启用");
+        // 手动启用监控（包含端口信息）
+        NettyMonitorAgent.initialize("ChatsServer-" + INSTANCE.port);
+        System.out.println("监控代理已启用，应用名称: ChatsServer-" + INSTANCE.port);
 
         INSTANCE.start(INSTANCE.port, new ChatsServerInitializer(), new Consumer<String>() {
             @Override

@@ -70,9 +70,14 @@ public class MonitorAgent {
      * 获取监控Handler
      */
     public static ChannelHandler getMonitorHandler() {
-        if (instance == null || !instance.connected) {
+        if (instance == null) {
+            logger.info("⚠️ MonitorAgent: Instance is null, returning NoOpHandler");
             return new NoOpHandler();
         }
+        
+        // 即使还没有连接，也返回真正的MonitorHandler
+        // 这样可以确保Channel事件被捕获，即使监控数据暂时无法发送
+        logger.info("✅ MonitorAgent: Returning MonitorHandler (connected:  %s)", instance.connected);
         return new MonitorHandler(instance);
     }
     
@@ -103,14 +108,21 @@ public class MonitorAgent {
                 });
         
         try {
-            ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port)).sync();
-            clientChannel = future.channel();
-            connected = true;
-            
-            logger.info("Connected to monitor server at %s:%d", host, port);
-            
-            // 发送应用注册消息
-            sendApplicationInfo();
+            ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port));
+            future.addListener((ChannelFutureListener) channelFuture -> {
+                if (channelFuture.isSuccess()) {
+                    clientChannel = channelFuture.channel();
+                    connected = true;
+                    logger.info("Successfully connected to monitor server at %s:%d", host, port);
+                    
+                    // 发送应用注册消息
+                    sendApplicationInfo();
+                } else {
+                    logger.warn("Failed to connect to monitor server: %s", channelFuture.cause().getMessage());
+
+                    scheduleReconnect();
+                }
+            });
             
         } catch (Exception e) {
             logger.warn("Failed to connect to monitor server: %s", e.getMessage());
@@ -147,10 +159,12 @@ public class MonitorAgent {
             
             if (clientChannel != null && clientChannel.isActive()) {
                 clientChannel.writeAndFlush(json);
-                logger.debug("Sent application registration: %s", applicationName);
+                logger.trace("Monitor Agent: Sent application registration for: %s", applicationName);
+            } else {
+                logger.warn("❌ Monitor Agent Cannot send application info - channel not active");
             }
         } catch (Exception e) {
-            logger.warn("Failed to send application info: %s", e.getMessage());
+            logger.warn("Monitor Agent: Failed to send application info: %s", e.getMessage());
         }
     }
     
@@ -159,7 +173,7 @@ public class MonitorAgent {
      */
     public void sendChannelInfo(ChannelInfo channelInfo, String eventType) {
         if (!connected || clientChannel == null || !clientChannel.isActive()) {
-            logger.debug("Not connected to monitor server, skipping channel info");
+            logger.info("❌ Not connected to monitor server, skipping %s channel info for %s.", eventType, (channelInfo != null ? channelInfo.getChannelId() : "unknown"));
             return;
         }
         
@@ -171,9 +185,9 @@ public class MonitorAgent {
                     .put("timestamp", System.currentTimeMillis())
                     .build();
             
+            System.out.println("📡 MonitorAgent: Sending JSON: " + json.substring(0, Math.min(200, json.length())) + "...");
             clientChannel.writeAndFlush(json);
-            logger.debug("Sent channel info: %s - %s", eventType, channelInfo.getChannelId());
-            
+            logger.info("✅ Sent channel info: %s for channel %s", eventType, channelInfo.getChannelId());
         } catch (Exception e) {
             logger.warn("Failed to send channel info: %s", e.getMessage());
         }
@@ -189,6 +203,13 @@ public class MonitorAgent {
                 connectToMonitorServer();
             }
         }, 5, TimeUnit.SECONDS);
+    }
+    
+    /**
+     * 检查是否已连接到监控服务器
+     */
+    public boolean isConnected() {
+        return connected;
     }
     
     /**
@@ -210,7 +231,7 @@ public class MonitorAgent {
         
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            logger.info("Monitor client connected to server");
+            logger.info("Monitor client connected to server at %s:%s", host, port);
             connected = true;
         }
         

@@ -209,7 +209,8 @@ public class LocalMonitorServer {
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
             try {
                 String json = (String) msg;
-                log.debug("Received monitor data: {}", json);
+                log.info("Received monitor data: {}", json);
+                System.out.println("📥 LocalMonitorServer: Received JSON: " + json);
                 
                 // 解析监控消息
                 MonitorMessage message = objectMapper.readValue(json, MonitorMessage.class);
@@ -257,6 +258,8 @@ public class LocalMonitorServer {
                 String channelId = message.getChannelInfo().getChannelId();
                 String appName = message.getApplicationName();
                 
+                System.out.println("🔄 LocalMonitorServer: Processing CHANNEL_ACTIVE for: " + channelId + " from " + appName);
+                
                 // 跟踪Channel和应用的关系
                 channelToApp.put(channelId, appName);
                 appToChannels.computeIfAbsent(appName, k -> ConcurrentHashMap.newKeySet()).add(channelId);
@@ -265,8 +268,9 @@ public class LocalMonitorServer {
                 com.yueny.stars.netty.visualizer.model.ChannelInfo channelInfo = 
                         convertChannelInfo(message.getChannelInfo(), message.getApplicationName());
                 monitorService.registerChannel(channelInfo);
-                log.debug("Channel registered: {} from {}", 
+                log.info("Channel registered: {} from {}", 
                         channelInfo.getChannelId(), message.getApplicationName());
+                System.out.println("✅ LocalMonitorServer: Channel registered: " + channelId + " from " + appName);
             }
         }
         
@@ -299,6 +303,13 @@ public class LocalMonitorServer {
         
         private void handleChannelException(MonitorMessage message) {
             if (message.getChannelInfo() != null) {
+                // 转换ChannelInfo并处理异常
+                com.yueny.stars.netty.visualizer.model.ChannelInfo channelInfo = 
+                        convertChannelInfo(message.getChannelInfo(), message.getApplicationName());
+                
+                // 处理异常统计
+                monitorService.handleChannelException(channelInfo);
+                
                 log.warn("Channel exception in {}: {} - {}", 
                         message.getApplicationName(),
                         message.getChannelInfo().getChannelId(),
@@ -336,6 +347,32 @@ public class LocalMonitorServer {
             consoleInfo.setMessagesWritten(agentInfo.getMessagesWritten());
             consoleInfo.setEventLoopGroup(agentInfo.getEventLoopGroup());
             consoleInfo.setPipeline(agentInfo.getPipeline());
+            
+            // 添加错误信息
+            if (agentInfo.getErrorMessage() != null) {
+                consoleInfo.setErrorMessage(agentInfo.getErrorMessage());
+                
+                // 使用反射安全地获取错误类型和堆栈跟踪
+                try {
+                    java.lang.reflect.Method getErrorTypeMethod = agentInfo.getClass().getMethod("getErrorType");
+                    String errorType = (String) getErrorTypeMethod.invoke(agentInfo);
+                    if (errorType != null) {
+                        consoleInfo.setErrorType(errorType);
+                    }
+                } catch (Exception e) {
+                    // 方法不存在或调用失败，忽略
+                }
+                
+                try {
+                    java.lang.reflect.Method getStackTraceMethod = agentInfo.getClass().getMethod("getStackTrace");
+                    String stackTrace = (String) getStackTraceMethod.invoke(agentInfo);
+                    if (stackTrace != null) {
+                        consoleInfo.setStackTrace(stackTrace);
+                    }
+                } catch (Exception e) {
+                    // 方法不存在或调用失败，忽略
+                }
+            }
             
             // 添加应用名称信息
             consoleInfo.setApplicationName(appName);

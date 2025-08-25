@@ -1,8 +1,9 @@
 package com.yueny.stars.netty.monitor.agent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yueny.stars.netty.monitor.agent.model.ChannelInfo;
 import com.yueny.stars.netty.monitor.agent.model.MonitorMessage;
+import com.yueny.stars.netty.monitor.agent.util.JsonUtil;
+import com.yueny.stars.netty.monitor.agent.util.Logger;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.local.LocalAddress;
@@ -15,7 +16,6 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
-import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -25,12 +25,12 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author fengyang
  */
-@Slf4j
 public class LocalMonitorAgent {
+    
+    private static final Logger logger = Logger.getLogger(LocalMonitorAgent.class);
     
     private final String applicationName;
     private final String socketPath;
-    private final ObjectMapper objectMapper;
     private final EventLoopGroup group;
     private Channel clientChannel;
     private volatile boolean connected = false;
@@ -40,7 +40,6 @@ public class LocalMonitorAgent {
     public LocalMonitorAgent(String applicationName, String socketPath) {
         this.applicationName = applicationName;
         this.socketPath = socketPath;
-        this.objectMapper = new ObjectMapper();
         this.group = new NioEventLoopGroup(1);
         
         // 检查操作系统，Windows使用TCP，Unix使用LocalChannel
@@ -56,7 +55,7 @@ public class LocalMonitorAgent {
         try {
             connectToMonitorServer();
         } catch (Exception e) {
-            log.warn("Failed to connect to monitor server: {}", e.getMessage());
+            logger.warn("Failed to connect to monitor server: %s", e.getMessage());
             // 启动重连任务
             scheduleReconnect();
         }
@@ -93,10 +92,10 @@ public class LocalMonitorAgent {
             ChannelFuture future;
             if (useLocalChannel) {
                 future = bootstrap.connect(new LocalAddress(socketPath)).sync();
-                log.info("Connected to monitor server via LocalChannel at: {}", socketPath);
+                logger.info("Connected to monitor server via LocalChannel at: %s", socketPath);
             } else {
                 future = bootstrap.connect(new InetSocketAddress("localhost", tcpPort)).sync();
-                log.info("Connected to monitor server via TCP at: localhost:{}", tcpPort);
+                logger.info("Connected to monitor server via TCP at: localhost:%d", tcpPort);
             }
             
             clientChannel = future.channel();
@@ -106,7 +105,7 @@ public class LocalMonitorAgent {
             sendApplicationInfo();
             
         } catch (Exception e) {
-            log.warn("Failed to connect to monitor server: {}", e.getMessage());
+            logger.warn("Failed to connect to monitor server: %s", e.getMessage());
             scheduleReconnect();
         }
     }
@@ -137,13 +136,18 @@ public class LocalMonitorAgent {
             message.setApplicationName(applicationName);
             message.setTimestamp(System.currentTimeMillis());
             
-            String json = objectMapper.writeValueAsString(message);
+            String json = JsonUtil.builder()
+                    .put("type", message.getType())
+                    .put("applicationName", message.getApplicationName())
+                    .put("timestamp", message.getTimestamp())
+                    .build();
+            
             if (clientChannel != null && clientChannel.isActive()) {
                 clientChannel.writeAndFlush(json);
-                log.debug("Sent application registration: {}", applicationName);
+                logger.debug("Sent application registration: %s", applicationName);
             }
         } catch (Exception e) {
-            log.warn("Failed to send application info: {}", e.getMessage());
+            logger.warn("Failed to send application info: %s", e.getMessage());
         }
     }
     
@@ -152,23 +156,23 @@ public class LocalMonitorAgent {
      */
     public void sendChannelInfo(ChannelInfo channelInfo, String eventType) {
         if (!connected || clientChannel == null || !clientChannel.isActive()) {
-            log.debug("Not connected to monitor server, skipping channel info");
+            logger.debug("Not connected to monitor server, skipping channel info");
             return;
         }
         
         try {
-            MonitorMessage message = new MonitorMessage();
-            message.setType(eventType);
-            message.setApplicationName(applicationName);
-            message.setChannelInfo(channelInfo);
-            message.setTimestamp(System.currentTimeMillis());
+            String json = JsonUtil.builder()
+                    .put("type", eventType)
+                    .put("applicationName", applicationName)
+                    .put("channelInfo", channelInfo)
+                    .put("timestamp", System.currentTimeMillis())
+                    .build();
             
-            String json = objectMapper.writeValueAsString(message);
             clientChannel.writeAndFlush(json);
-            log.debug("Sent channel info: {} - {}", eventType, channelInfo.getChannelId());
+            logger.debug("Sent channel info: %s - %s", eventType, channelInfo.getChannelId());
             
         } catch (Exception e) {
-            log.warn("Failed to send channel info: {}", e.getMessage());
+            logger.warn("Failed to send channel info: %s", e.getMessage());
         }
     }
     
@@ -178,7 +182,7 @@ public class LocalMonitorAgent {
     private void scheduleReconnect() {
         group.schedule(() -> {
             if (!connected) {
-                log.info("Attempting to reconnect to monitor server...");
+                logger.info("Attempting to reconnect to monitor server...");
                 connectToMonitorServer();
             }
         }, 5, TimeUnit.SECONDS);
@@ -193,7 +197,7 @@ public class LocalMonitorAgent {
             clientChannel.close();
         }
         group.shutdownGracefully();
-        log.info("Monitor agent shutdown");
+        logger.info("Monitor agent shutdown");
     }
     
     /**
@@ -203,13 +207,13 @@ public class LocalMonitorAgent {
         
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            log.info("Monitor client connected to server");
+            logger.info("Monitor client connected to server");
             connected = true;
         }
         
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-            log.warn("Monitor client disconnected from server");
+            logger.warn("Monitor client disconnected from server");
             connected = false;
             // 尝试重连
             scheduleReconnect();
@@ -217,7 +221,7 @@ public class LocalMonitorAgent {
         
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-            log.warn("Monitor client error: {}", cause.getMessage());
+            logger.warn("Monitor client error: %s", cause.getMessage());
             ctx.close();
         }
     }

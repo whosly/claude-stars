@@ -2,14 +2,12 @@ package com.yueny.stars.netty.monitor.agent;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 轻量级监控Handler
  * 
  * @author fengyang
  */
-@Slf4j
 public class MonitorHandler extends ChannelInboundHandlerAdapter {
     
     private final MonitorAgent agent;

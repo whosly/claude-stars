@@ -1,9 +1,9 @@
 package com.yueny.stars.netty.monitor.agent;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yueny.stars.netty.monitor.agent.model.ChannelInfo;
+import com.yueny.stars.netty.monitor.agent.util.JsonUtil;
+import com.yueny.stars.netty.monitor.agent.util.Logger;
 import io.netty.channel.Channel;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -20,14 +20,13 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author fengyang
  */
-@Slf4j
 public class MonitorAgent {
     
+    private static final Logger logger = Logger.getLogger(MonitorAgent.class);
     private static final String DEFAULT_MONITOR_URL = "http://localhost:8080/api/netty/monitor/agent";
     private static MonitorAgent instance;
     
     private final String monitorUrl;
-    private final ObjectMapper objectMapper;
     private final Map<String, ChannelInfo> channels;
     private final ScheduledExecutorService scheduler;
     private String applicationName;
@@ -35,7 +34,6 @@ public class MonitorAgent {
     
     private MonitorAgent(String monitorUrl) {
         this.monitorUrl = monitorUrl;
-        this.objectMapper = new ObjectMapper();
         this.channels = new ConcurrentHashMap<>();
         this.scheduler = Executors.newScheduledThreadPool(1);
         this.applicationName = "Unknown";
@@ -61,7 +59,7 @@ public class MonitorAgent {
         // 每15秒发送一次数据（降低频率减少网络开销）
         scheduler.scheduleAtFixedRate(this::sendMonitorData, 15, 15, TimeUnit.SECONDS);
         
-        log.info("Monitor agent initialized for application: {}", applicationName);
+        logger.info("Monitor agent initialized for application: %s", applicationName);
     }
     
     public void registerChannel(Channel channel) {
@@ -80,13 +78,13 @@ public class MonitorAgent {
         info.setPipeline(getPipelineInfo(channel));
         
         channels.put(info.getChannelId(), info);
-        log.debug("Channel registered: {}", info.getChannelId());
+        logger.debug("Channel registered: %s", info.getChannelId());
     }
     
     public void unregisterChannel(String channelId) {
         if (!enabled) return;
         channels.remove(channelId);
-        log.debug("Channel unregistered: {}", channelId);
+        logger.debug("Channel unregistered: %s", channelId);
     }
     
     public void updateChannel(Channel channel) {
@@ -114,7 +112,7 @@ public class MonitorAgent {
             data.put("channels", channels.values());
             data.put("stats", getStats());
             
-            String jsonData = objectMapper.writeValueAsString(data);
+            String jsonData = JsonUtil.toJson(data);
             
             URL url = new URL(monitorUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -130,13 +128,13 @@ public class MonitorAgent {
             
             int responseCode = conn.getResponseCode();
             if (responseCode == 200) {
-                log.debug("Monitor data sent successfully");
+                logger.debug("Monitor data sent successfully");
             } else {
-                log.warn("Failed to send monitor data, response code: {}", responseCode);
+                logger.warn("Failed to send monitor data, response code: %d", responseCode);
             }
             
         } catch (Exception e) {
-            log.debug("Error sending monitor data (will retry): {}", e.getMessage());
+            logger.debug("Error sending monitor data (will retry): %s", e.getMessage());
             // 不打印完整堆栈，避免日志污染
         }
     }
@@ -179,6 +177,6 @@ public class MonitorAgent {
     
     public void shutdown() {
         scheduler.shutdown();
-        log.info("Monitor agent shutdown");
+        logger.info("Monitor agent shutdown");
     }
 }

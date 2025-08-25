@@ -74,16 +74,28 @@ class ChatsServerHandler extends SimpleChannelInboundHandler<Message> {
         // 获取到当前 channel
         Channel incoming = ctx.channel();
 
-        String trimmed = msg == null ? "" : msg.getMessage().trim();
+        // 检查消息是否有效
+        if (!msg.isValid()) {
+            System.out.println("收到无效消息，忽略处理 - " + getDisplayName(incoming));
+            return;
+        }
+
+        String trimmed = msg.getTrimmedMessage();
 
         // 处理改名命令：/name 新用户名
         if (trimmed.startsWith("/name ")) {
             String newName = trimmed.substring(6).trim();
+            // 清理用户名：去除换行符和前后空白
+            newName = newName.replaceAll("[\\r\\n]+", "");
+            
             if (newName.isEmpty()) {
-                incoming.writeAndFlush(new Message("用户名不能为空"));
+                incoming.writeAndFlush(new Message("用户名不能为空，请输入有效的用户名"));
             } else {
                 channelToUsername.put(incoming, newName);
-                incoming.writeAndFlush(new Message("昵称已更新为：" + newName));
+                // 设置用户名到channel属性中，供监控系统使用
+                incoming.attr(io.netty.util.AttributeKey.valueOf("username")).set(newName);
+                incoming.writeAndFlush(new Message("欢迎来到聊天室，" + newName + "！昵称已设置成功。"));
+                System.out.println("用户 " + newName + " 设置昵称成功 (" + incoming.remoteAddress() + ")");
             }
             return;
         }

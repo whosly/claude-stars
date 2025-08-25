@@ -30,4 +30,9 @@ public class WebController {
     public String performance() {
         return "performance";
     }
+    
+    @GetMapping("/errors")
+    public String errors() {
+        return "errors";
+    }
 }

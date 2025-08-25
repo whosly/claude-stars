@@ -22,7 +22,7 @@
 		<!-- 依赖监控代理模块 -->
 		<dependency>
 			<groupId>com.yueny.study</groupId>
-			<artifactId>netty-monitor-agent</artifactId>
+			<artifactId>agent</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

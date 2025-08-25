@@ -43,6 +43,7 @@
                 <a class="nav-link active" href="/channels">Channels</a>
                 <a class="nav-link" href="/eventloops">Event Loops</a>
                 <a class="nav-link" href="/performance">Performance</a>
+                <a class="nav-link" href="/errors">错误分析</a>
             </div>
         </div>
     </nav>
@@ -62,6 +63,16 @@
         <!-- 应用统计概览 -->
         <div class="row mb-4" id="applicationStats">
             <!-- 统计卡片将在这里动态生成 -->
+        </div>
+
+        <!-- 过滤条件提示 -->
+        <div class="row mb-2" id="filterAlert" style="display: none;">
+            <div class="col-12">
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="fas fa-filter"></i> <span id="filterMessage"></span>
+                    <button type="button" class="btn-close" onclick="clearFilters()"></button>
+                </div>
+            </div>
         </div>
 
         <!-- 过滤器 -->
@@ -122,17 +133,40 @@
         let currentChannelId = null;
 
         function refreshChannels() {
+            // 显示加载状态
+            document.getElementById('channelContainer').innerHTML = `
+                <div class="col-12 text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <div class="mt-2">正在刷新Channel数据...</div>
+                </div>
+            `;
+            
             fetch('/api/netty/channels')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    channels = data;
+                    channels = Array.isArray(data) ? data : [];
                     updateApplicationFilter();
                     renderChannels(channels);
+                    console.log('Channel数据刷新成功，共', channels.length, '个Channel');
                 })
                 .catch(error => {
                     console.error('获取Channel数据失败:', error);
-                    document.getElementById('channelContainer').innerHTML = 
-                        '<div class="col-12"><div class="alert alert-danger">获取数据失败</div></div>';
+                    document.getElementById('channelContainer').innerHTML = `
+                        <div class="col-12">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                获取Channel数据失败: ${error.message}
+                                <br><small>请检查服务器是否正常运行，或尝试重新刷新页面</small>
+                            </div>
+                        </div>
+                    `;
                 });
         }
 
@@ -377,6 +411,7 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const statusFilter = document.getElementById('statusFilter').value;
             const applicationFilter = document.getElementById('applicationFilter').value;
+            const params = getUrlParams();
             
             let filtered = channels.filter(channel => {
                 const matchesSearch = !searchTerm || 
@@ -388,7 +423,11 @@
                 const matchesStatus = !statusFilter || channel.state === statusFilter;
                 const matchesApplication = !applicationFilter || channel.applicationName === applicationFilter;
                 
-                return matchesSearch && matchesStatus && matchesApplication;
+                // EventLoop过滤逻辑
+                const matchesEventLoop = !params.eventloop || 
+                    (channel.eventLoopGroup && channel.eventLoopGroup.toLowerCase().includes(params.eventloop.toLowerCase()));
+                
+                return matchesSearch && matchesStatus && matchesApplication && matchesEventLoop;
             });
             
             renderChannels(filtered);
@@ -399,9 +438,95 @@
         document.getElementById('statusFilter').addEventListener('change', filterChannels);
         document.getElementById('applicationFilter').addEventListener('change', filterChannels);
 
+        // 从URL参数中获取搜索条件
+        function getUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                search: urlParams.get('search'),
+                status: urlParams.get('status'),
+                application: urlParams.get('application'),
+                eventloop: urlParams.get('eventloop')
+            };
+        }
+
+        // 应用URL参数到过滤器
+        function applyUrlParams() {
+            const params = getUrlParams();
+            
+            if (params.search) {
+                document.getElementById('searchInput').value = params.search;
+            }
+            
+            if (params.status) {
+                document.getElementById('statusFilter').value = params.status;
+            }
+            
+            if (params.application) {
+                document.getElementById('applicationFilter').value = params.application;
+            }
+            
+            // 显示过滤条件提示
+            showFilterAlert(params);
+            
+            // 应用过滤
+            if (params.search || params.status || params.application || params.eventloop) {
+                filterChannels();
+            }
+        }
+
+        // 显示过滤条件提示
+        function showFilterAlert(params) {
+            const filterMessages = [];
+            
+            if (params.search) {
+                filterMessages.push(`搜索: "${params.search}"`);
+            }
+            
+            if (params.status) {
+                filterMessages.push(`状态: ${params.status}`);
+            }
+            
+            if (params.application) {
+                filterMessages.push(`应用: ${params.application}`);
+            }
+            
+            if (params.eventloop) {
+                filterMessages.push(`EventLoop: "${params.eventloop}"`);
+            }
+            
+            if (filterMessages.length > 0) {
+                document.getElementById('filterMessage').textContent = 
+                    `当前过滤条件: ${filterMessages.join(', ')}`;
+                document.getElementById('filterAlert').style.display = 'block';
+            }
+        }
+
+        // 清除所有过滤条件
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('applicationFilter').value = '';
+            document.getElementById('searchInput').placeholder = '搜索 Channel ID 或地址...';
+            document.getElementById('filterAlert').style.display = 'none';
+            
+            // 清除URL参数
+            const url = new URL(window.location);
+            url.search = '';
+            window.history.replaceState({}, '', url);
+            
+            // 重新渲染所有channels
+            renderChannels(channels);
+        }
+
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
             refreshChannels();
+            
+            // 数据加载完成后应用URL参数
+            setTimeout(() => {
+                applyUrlParams();
+            }, 1000);
+            
             setInterval(refreshChannels, 10000); // 每10秒自动刷新
         });
     </script>

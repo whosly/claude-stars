@@ -1,15 +1,16 @@
 package com.yueny.stars.netty.monitor.agent;
 
+import com.yueny.stars.netty.monitor.agent.util.Logger;
 import io.netty.channel.ChannelHandler;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Netty监控工具类 - 支持本地Socket通信
  * 
  * @author fengyang
  */
-@Slf4j
 public class NettyMonitor {
+    
+    private static final Logger logger = Logger.getLogger(NettyMonitor.class);
     
     private static LocalMonitorAgent agent;
     private static boolean initialized = false;
@@ -26,7 +27,7 @@ public class NettyMonitor {
      */
     public static void initialize(String applicationName, String socketPathOrPort) {
         if (initialized) {
-            log.warn("NettyMonitor already initialized");
+            logger.warn("NettyMonitor already initialized");
             return;
         }
         
@@ -42,9 +43,9 @@ public class NettyMonitor {
                 }
             }));
             
-            log.info("NettyMonitor initialized for application: {} with socket/port: {}", applicationName, socketPathOrPort);
+            logger.info("NettyMonitor initialized for application: %s with socket/port: %s", applicationName, socketPathOrPort);
         } catch (Exception e) {
-            log.warn("Failed to initialize NettyMonitor: {}", e.getMessage());
+            logger.warn("Failed to initialize NettyMonitor: %s", e.getMessage());
             initialized = false;
         }
     }
@@ -54,7 +55,7 @@ public class NettyMonitor {
      */
     public static ChannelHandler getMonitorHandler() {
         if (!initialized || agent == null) {
-            log.debug("NettyMonitor not initialized, returning no-op handler");
+            logger.debug("NettyMonitor not initialized, returning no-op handler");
             return new NoOpHandler();
         }
         return new LocalMonitorHandler(agent);

@@ -26,4 +26,7 @@ public class ChannelInfo {
     private String eventLoopGroup;
     private String pipeline;
     private String applicationName;  // 添加应用名称字段
+    private String errorMessage;     // 错误消息
+    private String errorType;        // 错误类型
+    private String stackTrace;       // 堆栈跟踪
 }

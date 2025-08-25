@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance - Netty Visualizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .metric-card {
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-network-wired"></i> Netty Visualizer
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/channels">Channels</a>
+                <a class="nav-link" href="/eventloops">Event Loops</a>
+                <a class="nav-link active" href="/performance">Performance</a>
+                <a class="nav-link" href="/errors">错误分析</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1><i class="fas fa-chart-line"></i> 性能监控</h1>
+                    <div>
+                        <button class="btn btn-primary" onclick="refreshData()">
+                            <i class="fas fa-sync-alt"></i> 刷新
+                        </button>
+                        <button class="btn btn-success" onclick="toggleMonitoring()">
+                            <i class="fas fa-play" id="monitoringIcon"></i> 
+                            <span id="monitoringText">开始监控</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实时指标 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card metric-card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tachometer-alt fa-2x mb-2"></i>
+                        <div class="h4" id="throughput">0</div>
+                        <div>吞吐量 (msg/s)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <div class="h4" id="latency">0</div>
+                        <div>平均延迟 (ms)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-memory fa-2x mb-2"></i>
+                        <div class="h4" id="memoryUsage">0</div>
+                        <div>内存使用 (MB)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-microchip fa-2x mb-2"></i>
+                        <div class="h4" id="cpuUsage">0</div>
+                        <div>CPU使用率 (%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">吞吐量趋势</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="throughputChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">延迟分布</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="latencyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">内存使用情况</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="memoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">连接数变化</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="connectionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 详细统计 -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">详细统计信息</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td>总连接数</td>
+                                            <td><span id="totalConnections" class="badge bg-primary">0</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>活跃连接数</td>
+                                            <td><span id="activeConnections" class="badge bg-success">0</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>总字节发送</td>
+                                            <td><span id="bytesSent" class="badge bg-info">0</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>总字节接收</td>
+                                            <td><span id="bytesReceived" class="badge bg-warning">0</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td>EventLoop数量</td>
+                                            <td><span id="eventLoopCount" class="badge bg-secondary">0</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>平均响应时间</td>
+                                            <td><span id="avgResponseTime" class="badge bg-primary">0 ms</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>错误率</td>
+                                            <td><span id="errorRate" class="badge bg-danger">0%</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>运行时间</td>
+                                            <td><span id="uptime" class="badge bg-success">0s</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let isMonitoring = false;
+        let monitoringInterval;
+        let charts = {};
+        let performanceData = {
+            throughput: [],
+            latency: [],
+            memory: [],
+            connections: [],
+            timestamps: []
+        };
+
+        // 初始化图表
+        function initCharts() {
+            // 吞吐量图表
+            const throughputCtx = document.getElementById('throughputChart').getContext('2d');
+            charts.throughput = new Chart(throughputCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '吞吐量 (msg/s)',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // 延迟图表
+            const latencyCtx = document.getElementById('latencyChart').getContext('2d');
+            charts.latency = new Chart(latencyCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '延迟 (ms)',
+                        data: [],
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // 内存图表
+            const memoryCtx = document.getElementById('memoryChart').getContext('2d');
+            charts.memory = new Chart(memoryCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '内存使用 (MB)',
+                        data: [],
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // 连接数图表
+            const connectionCtx = document.getElementById('connectionChart').getContext('2d');
+            charts.connection = new Chart(connectionCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '总连接数',
+                        data: [],
+                        borderColor: 'rgb(255, 205, 86)',
+                        backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                        tension: 0.1
+                    }, {
+                        label: '活跃连接数',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function refreshData() {
+            // 获取统计数据
+            fetch('/api/netty/stats')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    updateMetrics(data);
+                    updateCharts(data);
+                    updateDetailedStats(data);
+                })
+                .catch(error => {
+                    console.error('获取性能数据失败:', error);
+                    showError('获取性能数据失败: ' + error.message);
+                });
+        }
+
+        function updateMetrics(data) {
+            // 模拟性能数据（实际应用中应该从服务器获取真实数据）
+            const throughput = Math.floor(Math.random() * 1000) + (data.activeChannels || 0) * 10;
+            const latency = Math.floor(Math.random() * 50) + 10;
+            const memoryUsage = Math.floor(Math.random() * 100) + 50;
+            const cpuUsage = Math.floor(Math.random() * 30) + 10;
+
+            document.getElementById('throughput').textContent = throughput;
+            document.getElementById('latency').textContent = latency;
+            document.getElementById('memoryUsage').textContent = memoryUsage;
+            document.getElementById('cpuUsage').textContent = cpuUsage;
+        }
+
+        function updateCharts(data) {
+            const now = new Date().toLocaleTimeString();
+            const maxDataPoints = 20;
+
+            // 模拟数据
+            const throughput = Math.floor(Math.random() * 1000) + (data.activeChannels || 0) * 10;
+            const latency = Math.floor(Math.random() * 50) + 10;
+            const memory = Math.floor(Math.random() * 100) + 50;
+
+            // 更新数据数组
+            performanceData.timestamps.push(now);
+            performanceData.throughput.push(throughput);
+            performanceData.latency.push(latency);
+            performanceData.memory.push(memory);
+            performanceData.connections.push(data.totalChannels || 0);
+
+            // 限制数据点数量
+            if (performanceData.timestamps.length > maxDataPoints) {
+                performanceData.timestamps.shift();
+                performanceData.throughput.shift();
+                performanceData.latency.shift();
+                performanceData.memory.shift();
+                performanceData.connections.shift();
+            }
+
+            // 更新图表
+            charts.throughput.data.labels = [...performanceData.timestamps];
+            charts.throughput.data.datasets[0].data = [...performanceData.throughput];
+            charts.throughput.update('none');
+
+            charts.latency.data.labels = [...performanceData.timestamps];
+            charts.latency.data.datasets[0].data = [...performanceData.latency];
+            charts.latency.update('none');
+
+            charts.memory.data.labels = [...performanceData.timestamps];
+            charts.memory.data.datasets[0].data = [...performanceData.memory];
+            charts.memory.update('none');
+
+            charts.connection.data.labels = [...performanceData.timestamps];
+            charts.connection.data.datasets[0].data = [...performanceData.connections];
+            charts.connection.data.datasets[1].data = performanceData.connections.map(total => 
+                Math.floor(total * 0.8)); // 假设80%是活跃连接
+            charts.connection.update('none');
+        }
+
+        function updateDetailedStats(data) {
+            document.getElementById('totalConnections').textContent = data.totalChannels || 0;
+            document.getElementById('activeConnections').textContent = data.activeChannels || 0;
+            document.getElementById('eventLoopCount').textContent = data.eventLoops || 0;
+            
+            // 获取真实的错误统计数据
+            fetch('/api/netty/errors/stats')
+                .then(response => response.json())
+                .then(errorData => {
+                    document.getElementById('errorRate').textContent = errorData.errorRate.toFixed(2) + '%';
+                    
+                    // 更新错误率指标卡片
+                    const errorRateElement = document.getElementById('errorRateMetric');
+                    if (errorRateElement) {
+                        errorRateElement.textContent = errorData.errorRate.toFixed(1);
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to get error stats:', error);
+                    document.getElementById('errorRate').textContent = 'N/A';
+                });
+            
+            // 模拟其他统计数据
+            document.getElementById('bytesSent').textContent = formatBytes(Math.floor(Math.random() * 1000000));
+            document.getElementById('bytesReceived').textContent = formatBytes(Math.floor(Math.random() * 1000000));
+            document.getElementById('avgResponseTime').textContent = (Math.floor(Math.random() * 50) + 10) + ' ms';
+            document.getElementById('uptime').textContent = formatUptime(Date.now() - (Date.now() - Math.random() * 86400000));
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatUptime(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) return days + 'd ' + (hours % 24) + 'h';
+            if (hours > 0) return hours + 'h ' + (minutes % 60) + 'm';
+            if (minutes > 0) return minutes + 'm ' + (seconds % 60) + 's';
+            return seconds + 's';
+        }
+
+        function toggleMonitoring() {
+            if (isMonitoring) {
+                clearInterval(monitoringInterval);
+                isMonitoring = false;
+                document.getElementById('monitoringIcon').className = 'fas fa-play';
+                document.getElementById('monitoringText').textContent = '开始监控';
+            } else {
+                monitoringInterval = setInterval(refreshData, 2000);
+                isMonitoring = true;
+                document.getElementById('monitoringIcon').className = 'fas fa-pause';
+                document.getElementById('monitoringText').textContent = '停止监控';
+            }
+        }
+
+        function showError(message) {
+            // 可以在这里显示错误消息
+            console.error(message);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            refreshData();
+        });
+    </script>
+</body>
+</html>

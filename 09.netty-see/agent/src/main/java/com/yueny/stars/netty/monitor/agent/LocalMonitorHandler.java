@@ -1,18 +1,19 @@
 package com.yueny.stars.netty.monitor.agent;
 
 import com.yueny.stars.netty.monitor.agent.model.ChannelInfo;
+import com.yueny.stars.netty.monitor.agent.util.Logger;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 本地监控Handler - 收集Channel信息并发送到监控服务器
  * 
  * @author fengyang
  */
-@Slf4j
 public class LocalMonitorHandler extends ChannelInboundHandlerAdapter {
+    
+    private static final Logger logger = Logger.getLogger(LocalMonitorHandler.class);
     
     private final LocalMonitorAgent agent;
     
@@ -25,9 +26,9 @@ public class LocalMonitorHandler extends ChannelInboundHandlerAdapter {
         try {
             ChannelInfo channelInfo = createChannelInfo(ctx);
             agent.sendChannelInfo(channelInfo, "CHANNEL_ACTIVE");
-            log.debug("Channel active: {}", ctx.channel().id().asShortText());
+            logger.debug("Channel active: %s", ctx.channel().id().asShortText());
         } catch (Exception e) {
-            log.warn("Failed to send channel active info: {}", e.getMessage());
+            logger.warn("Failed to send channel active info: %s", e.getMessage());
         }
         super.channelActive(ctx);
     }
@@ -37,9 +38,9 @@ public class LocalMonitorHandler extends ChannelInboundHandlerAdapter {
         try {
             ChannelInfo channelInfo = createChannelInfo(ctx);
             agent.sendChannelInfo(channelInfo, "CHANNEL_INACTIVE");
-            log.debug("Channel inactive: {}", ctx.channel().id().asShortText());
+            logger.debug("Channel inactive: %s", ctx.channel().id().asShortText());
         } catch (Exception e) {
-            log.warn("Failed to send channel inactive info: {}", e.getMessage());
+            logger.warn("Failed to send channel inactive info: %s", e.getMessage());
         }
         super.channelInactive(ctx);
     }
@@ -56,9 +57,9 @@ public class LocalMonitorHandler extends ChannelInboundHandlerAdapter {
             }
             
             agent.sendChannelInfo(channelInfo, "CHANNEL_READ");
-            log.debug("Channel read: {} bytes", channelInfo.getBytesRead());
+            logger.debug("Channel read: %d bytes", channelInfo.getBytesRead());
         } catch (Exception e) {
-            log.warn("Failed to send channel read info: {}", e.getMessage());
+            logger.warn("Failed to send channel read info: %s", e.getMessage());
         }
         super.channelRead(ctx, msg);
     }
@@ -69,7 +70,7 @@ public class LocalMonitorHandler extends ChannelInboundHandlerAdapter {
             ChannelInfo channelInfo = createChannelInfo(ctx);
             agent.sendChannelInfo(channelInfo, "CHANNEL_READ_COMPLETE");
         } catch (Exception e) {
-            log.warn("Failed to send channel read complete info: {}", e.getMessage());
+            logger.warn("Failed to send channel read complete info: %s", e.getMessage());
         }
         super.channelReadComplete(ctx);
     }
@@ -80,9 +81,9 @@ public class LocalMonitorHandler extends ChannelInboundHandlerAdapter {
             ChannelInfo channelInfo = createChannelInfo(ctx);
             channelInfo.setErrorMessage(cause.getMessage());
             agent.sendChannelInfo(channelInfo, "CHANNEL_EXCEPTION");
-            log.debug("Channel exception: {}", cause.getMessage());
+            logger.debug("Channel exception: %s", cause.getMessage());
         } catch (Exception e) {
-            log.warn("Failed to send channel exception info: {}", e.getMessage());
+            logger.warn("Failed to send channel exception info: %s", e.getMessage());
         }
         super.exceptionCaught(ctx, cause);
     }

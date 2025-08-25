@@ -18,6 +18,9 @@ class ChatsClientInitializer extends ChannelInitializer<SocketChannel> {
         // 添加监控Handler（必须在最前面）
         if (NettyMonitorAgent.isInitialized()) {
             pipeline.addFirst("monitor", NettyMonitorAgent.getMonitorHandler());
+            System.out.println("✅ ChatsClientInitializer: Added MonitorHandler to pipeline");
+        } else {
+            System.out.println("⚠️ ChatsClientInitializer: NettyMonitorAgent not initialized, skipping MonitorHandler");
         }
 
         // 添加自定义的Message编解码器

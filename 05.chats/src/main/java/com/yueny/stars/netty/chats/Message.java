@@ -21,4 +21,18 @@ public class Message {
         this.message = message;
         this.timestamp = System.currentTimeMillis();
     }
+    
+    /**
+     * 检查消息是否有效（非空且非空白）
+     */
+    public boolean isValid() {
+        return message != null && !message.trim().isEmpty();
+    }
+    
+    /**
+     * 获取清理后的消息内容（去除前后空白）
+     */
+    public String getTrimmedMessage() {
+        return message != null ? message.trim() : "";
+    }
 }

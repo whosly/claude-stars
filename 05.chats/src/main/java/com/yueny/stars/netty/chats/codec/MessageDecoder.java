@@ -42,9 +42,15 @@ public class MessageDecoder extends ByteToMessageDecoder {
         in.readBytes(messageBytes);
         String messageContent = new String(messageBytes, StandardCharsets.UTF_8);
         
-        // 创建Message对象并添加到输出列表
+        // 创建Message对象
         Message message = new Message(messageContent);
         message.setTimestamp(timestamp);
-        out.add(message);
+        
+        // 只有有效消息才添加到输出列表
+        if (message.isValid()) {
+            out.add(message);
+        } else {
+            System.out.println("⚠️ MessageDecoder: 解码出无效消息，已忽略");
+        }
     }
 }

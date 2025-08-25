@@ -22,7 +22,11 @@ public class ChannelInfo {
     private String eventLoopGroup;
     private String pipeline;
     private String errorMessage;
+    private String errorType;
+    private String stackTrace;
     private long timestamp;
+    private String username;  // 用户名信息
+    private String channelRole;  // channel角色：CLIENT 或 SERVER
 
     // Getters and Setters
     public String getChannelId() { return channelId; }
@@ -73,6 +77,18 @@ public class ChannelInfo {
     public String getErrorMessage() { return errorMessage; }
     public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
 
+    public String getErrorType() { return errorType; }
+    public void setErrorType(String errorType) { this.errorType = errorType; }
+
+    public String getStackTrace() { return stackTrace; }
+    public void setStackTrace(String stackTrace) { this.stackTrace = stackTrace; }
+
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getChannelRole() { return channelRole; }
+    public void setChannelRole(String channelRole) { this.channelRole = channelRole; }
 }

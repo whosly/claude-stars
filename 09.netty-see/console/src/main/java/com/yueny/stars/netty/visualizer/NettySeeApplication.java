@@ -10,10 +10,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @date 2025-08-22
  */
 @SpringBootApplication
-public class NettyVisualizerApplication {
+public class NettySeeApplication {
     
     public static void main(String[] args) {
-        SpringApplication.run(NettyVisualizerApplication.class, args);
-        System.out.println("Netty Visualizer started at http://localhost:8081");
+        SpringApplication.run(NettySeeApplication.class, args);
+        System.out.println("Netty See started at http://localhost:8081");
     }
 }
