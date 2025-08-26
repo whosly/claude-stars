@@ -71,13 +71,13 @@ public class MonitorAgent {
      */
     public static ChannelHandler getMonitorHandler() {
         if (instance == null) {
-            logger.info("⚠️ MonitorAgent: Instance is null, returning NoOpHandler");
+            logger.info("MonitorAgent: Instance is null, returning NoOpHandler");
             return new NoOpHandler();
         }
         
         // 即使还没有连接，也返回真正的MonitorHandler
         // 这样可以确保Channel事件被捕获，即使监控数据暂时无法发送
-        logger.info("✅ MonitorAgent: Returning MonitorHandler (connected:  %s)", instance.connected);
+        logger.info("MonitorAgent: Returning MonitorHandler (connected:  %s)", instance.connected);
         return new MonitorHandler(instance);
     }
     
@@ -161,7 +161,7 @@ public class MonitorAgent {
                 clientChannel.writeAndFlush(json);
                 logger.trace("Monitor Agent: Sent application registration for: %s", applicationName);
             } else {
-                logger.warn("❌ Monitor Agent Cannot send application info - channel not active");
+                logger.warn("Monitor Agent Cannot send application info - channel not active");
             }
         } catch (Exception e) {
             logger.warn("Monitor Agent: Failed to send application info: %s", e.getMessage());
@@ -173,7 +173,7 @@ public class MonitorAgent {
      */
     public void sendChannelInfo(ChannelInfo channelInfo, String eventType) {
         if (!connected || clientChannel == null || !clientChannel.isActive()) {
-            logger.info("❌ Not connected to monitor server, skipping %s channel info for %s.", eventType, (channelInfo != null ? channelInfo.getChannelId() : "unknown"));
+            logger.info("Not connected to monitor server, skipping %s channel info for %s.", eventType, (channelInfo != null ? channelInfo.getChannelId() : "unknown"));
             return;
         }
         
@@ -184,10 +184,10 @@ public class MonitorAgent {
                     .put("channelInfo", channelInfo)
                     .put("timestamp", System.currentTimeMillis())
                     .build();
-            
-            System.out.println("📡 MonitorAgent: Sending JSON: " + json.substring(0, Math.min(200, json.length())) + "...");
+
+            logger.debug("MonitorAgent: Sending JSON(substring 20): %s...", json.substring(0, Math.min(20, json.length())));
             clientChannel.writeAndFlush(json);
-            logger.info("✅ Sent channel info: %s for channel %s", eventType, channelInfo.getChannelId());
+            logger.debug("Sent channel info: %s for channel %s", eventType, channelInfo.getChannelId());
         } catch (Exception e) {
             logger.warn("Failed to send channel info: %s", e.getMessage());
         }
@@ -199,7 +199,7 @@ public class MonitorAgent {
     private void scheduleReconnect() {
         group.schedule(() -> {
             if (!connected) {
-                logger.info("Attempting to reconnect to monitor server...");
+                logger.debug("Attempting to reconnect to monitor server...");
                 connectToMonitorServer();
             }
         }, 5, TimeUnit.SECONDS);

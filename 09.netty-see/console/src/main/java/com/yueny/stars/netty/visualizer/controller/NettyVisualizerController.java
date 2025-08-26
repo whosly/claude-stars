@@ -59,19 +59,63 @@ public class NettyVisualizerController {
     }
     
     /**
+     * 获取所有缓冲区信息
+     */
+    @GetMapping("/buffers")
+    public List<BufferInfo> getAllBuffers() {
+        try {
+            List<BufferInfo> buffers = monitorService.getAllBuffers();
+            log.info("API /buffers called, returning {} buffers", buffers.size());
+            return buffers;
+        } catch (Exception e) {
+            log.error("Failed to get buffer info", e);
+            return new ArrayList<>();
+        }
+    }
+    
+    /**
      * 获取指定Channel的缓冲区信息
      */
     @GetMapping("/channels/{channelId}/buffer")
     public BufferInfo getChannelBuffer(@PathVariable String channelId) {
         try {
-            return monitorService.getBufferInfo(channelId);
+            BufferInfo bufferInfo = monitorService.getBufferInfo(channelId);
+            if (bufferInfo == null) {
+                bufferInfo = new BufferInfo();
+                bufferInfo.setChannelId(channelId);
+                bufferInfo.setContent("Buffer info not found for channel: " + channelId);
+            }
+            return bufferInfo;
         } catch (Exception e) {
             log.error("Failed to get buffer info for channel: {}", channelId, e);
             BufferInfo errorInfo = new BufferInfo();
             errorInfo.setChannelId(channelId);
+            errorInfo.setApplicationName("Error");
             errorInfo.setContent("Error: " + e.getMessage());
             return errorInfo;
         }
+    }
+    
+    /**
+     * 更新缓冲区使用情况
+     */
+    @PostMapping("/buffers/{channelId}/usage")
+    public Map<String, Object> updateBufferUsage(
+            @PathVariable String channelId,
+            @RequestParam int capacity,
+            @RequestParam int readableBytes,
+            @RequestParam int writableBytes) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            monitorService.updateBufferUsage(channelId, capacity, readableBytes, writableBytes);
+            result.put("success", true);
+            result.put("message", "Buffer usage updated successfully");
+        } catch (Exception e) {
+            log.error("Failed to update buffer usage for channel: {}", channelId, e);
+            result.put("success", false);
+            result.put("message", "Failed to update buffer usage: " + e.getMessage());
+        }
+        return result;
     }
     
     /**
@@ -100,23 +144,7 @@ public class NettyVisualizerController {
         monitorService.unregisterChannel(channelId);
     }
     
-    /**
-     * 创建测试连接
-     */
-    @PostMapping("/test/connections")
-    public Map<String, Object> createTestConnections(@RequestParam(defaultValue = "1") int count) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            // 这里可以创建测试连接的逻辑
-            result.put("success", true);
-            result.put("message", "测试连接创建功能需要客户端主动连接到端口9999");
-            result.put("instruction", "请使用 telnet localhost 9999 或运行TestClient来创建连接");
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("message", "创建测试连接失败: " + e.getMessage());
-        }
-        return result;
-    }
+
     
     /**
      * 接收来自监控代理的数据

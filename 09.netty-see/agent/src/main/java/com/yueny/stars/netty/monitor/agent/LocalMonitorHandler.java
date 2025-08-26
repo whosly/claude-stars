@@ -26,7 +26,7 @@ public class LocalMonitorHandler extends ChannelInboundHandlerAdapter {
         try {
             ChannelInfo channelInfo = createChannelInfo(ctx);
             agent.sendChannelInfo(channelInfo, "CHANNEL_ACTIVE");
-            logger.debug("Channel active: %s", ctx.channel().id().asShortText());
+            logger.trace("Channel active: %s", ctx.channel().id().asShortText());
         } catch (Exception e) {
             logger.warn("Failed to send channel active info: %s", e.getMessage());
         }
@@ -38,7 +38,7 @@ public class LocalMonitorHandler extends ChannelInboundHandlerAdapter {
         try {
             ChannelInfo channelInfo = createChannelInfo(ctx);
             agent.sendChannelInfo(channelInfo, "CHANNEL_INACTIVE");
-            logger.debug("Channel inactive: %s", ctx.channel().id().asShortText());
+            logger.trace("Channel inactive: %s", ctx.channel().id().asShortText());
         } catch (Exception e) {
             logger.warn("Failed to send channel inactive info: %s", e.getMessage());
         }
@@ -57,7 +57,7 @@ public class LocalMonitorHandler extends ChannelInboundHandlerAdapter {
             }
             
             agent.sendChannelInfo(channelInfo, "CHANNEL_READ");
-            logger.debug("Channel read: %d bytes", channelInfo.getBytesRead());
+            logger.trace("Channel read: %d bytes", channelInfo.getBytesRead());
         } catch (Exception e) {
             logger.warn("Failed to send channel read info: %s", e.getMessage());
         }

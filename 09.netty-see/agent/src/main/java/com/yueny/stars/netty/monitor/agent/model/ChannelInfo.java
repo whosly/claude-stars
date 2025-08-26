@@ -1,5 +1,7 @@
 package com.yueny.stars.netty.monitor.agent.model;
 
+import java.util.Map;
+
 /**
  * Channel信息模型
  * 
@@ -27,6 +29,11 @@ public class ChannelInfo {
     private long timestamp;
     private String username;  // 用户名信息
     private String channelRole;  // channel角色：CLIENT 或 SERVER
+
+    /**
+     * 缓冲区信息
+     */
+    private Map<String, Object> bufferInfo;
 
     // Getters and Setters
     public String getChannelId() { return channelId; }
@@ -91,4 +98,12 @@ public class ChannelInfo {
 
     public String getChannelRole() { return channelRole; }
     public void setChannelRole(String channelRole) { this.channelRole = channelRole; }
+
+    public Map<String, Object> getBufferInfo() {
+        return bufferInfo;
+    }
+
+    public void setBufferInfo(Map<String, Object> bufferInfo) {
+        this.bufferInfo = bufferInfo;
+    }
 }

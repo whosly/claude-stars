@@ -136,51 +136,246 @@ public class NettyMonitorService {
         return new ArrayList<>(allEventLoops.values());
     }
     
+    // 存储缓冲区信息
+    private final Map<String, BufferInfo> bufferStats = new ConcurrentHashMap<>();
+    
+    /**
+     * 获取所有缓冲区信息
+     */
+    public List<BufferInfo> getAllBuffers() {
+        // 更新缓冲区统计信息
+        updateBufferStats();
+        return new ArrayList<>(bufferStats.values());
+    }
+    
     /**
      * 获取指定Channel的缓冲区信息
      */
     public BufferInfo getBufferInfo(String channelId) {
+        BufferInfo bufferInfo = bufferStats.get(channelId);
+        if (bufferInfo != null) {
+            // 更新时间戳
+            bufferInfo.setLastUpdateTime(LocalDateTime.now());
+            return bufferInfo;
+        }
+        
+        // 如果缓存中没有，尝试从Channel创建
+        bufferInfo = createBufferInfoFromChannel(channelId);
+        if (bufferInfo != null) {
+            bufferStats.put(channelId, bufferInfo);
+        }
+        
+        return bufferInfo;
+    }
+    
+    /**
+     * 从Channel创建缓冲区信息
+     */
+    private BufferInfo createBufferInfoFromChannel(String channelId) {
         BufferInfo bufferInfo = new BufferInfo();
         bufferInfo.setChannelId(channelId);
+        bufferInfo.setLastUpdateTime(LocalDateTime.now());
         
         // 检查是否有实际的Channel对象
         Channel channel = findChannelById(channelId);
         if (channel != null) {
-            // 如果有实际Channel，可以获取更详细的缓冲区信息
-            bufferInfo.setCapacity(1024); // 示例值
-            bufferInfo.setReadableBytes(0);
-            bufferInfo.setWritableBytes(1024);
-            bufferInfo.setReaderIndex(0);
-            bufferInfo.setWriterIndex(0);
-            bufferInfo.setDirect(true);
-            bufferInfo.setRefCount(1);
-            bufferInfo.setContent("No data available");
+            // 从实际Channel获取信息
+            populateBufferInfoFromChannel(bufferInfo, channel);
         } else {
             // 对于通过监控代理接收的Channel，提供基本信息
             ChannelInfo channelInfo = channelStats.get(channelId);
             if (channelInfo != null) {
-                bufferInfo.setCapacity(1024); // 默认值
-                bufferInfo.setReadableBytes((int) channelInfo.getBytesRead());
-                bufferInfo.setWritableBytes(1024 - (int) channelInfo.getBytesWritten());
-                bufferInfo.setReaderIndex(0);
-                bufferInfo.setWriterIndex((int) channelInfo.getBytesWritten());
-                bufferInfo.setDirect(true);
-                bufferInfo.setRefCount(1);
-                bufferInfo.setContent("Remote channel - limited buffer info available");
+                populateBufferInfoFromChannelInfo(bufferInfo, channelInfo);
             } else {
                 // 如果找不到Channel信息，返回默认值
-                bufferInfo.setCapacity(0);
-                bufferInfo.setReadableBytes(0);
-                bufferInfo.setWritableBytes(0);
-                bufferInfo.setReaderIndex(0);
-                bufferInfo.setWriterIndex(0);
-                bufferInfo.setDirect(false);
-                bufferInfo.setRefCount(0);
-                bufferInfo.setContent("Channel not found");
+                populateDefaultBufferInfo(bufferInfo);
             }
         }
         
         return bufferInfo;
+    }
+    
+    /**
+     * 从实际Channel填充缓冲区信息
+     */
+    private void populateBufferInfoFromChannel(BufferInfo bufferInfo, Channel channel) {
+        ChannelInfo channelInfo = channelStats.get(channel.id().asShortText());
+        
+        // 基本信息
+        bufferInfo.setApplicationName(channelInfo != null ? channelInfo.getApplicationName() : "Local");
+        bufferInfo.setCapacity(8192); // 默认8KB
+        bufferInfo.setMaxCapacity(65536); // 默认64KB
+        bufferInfo.setReadableBytes(0);
+        bufferInfo.setWritableBytes(8192);
+        bufferInfo.setReaderIndex(0);
+        bufferInfo.setWriterIndex(0);
+        bufferInfo.setDirect(true);
+        bufferInfo.setHasArray(false);
+        bufferInfo.setRefCount(1);
+        bufferInfo.setBufferType("DirectByteBuf");
+        bufferInfo.setContent("Active channel - buffer content not accessible");
+        
+        // 统计信息
+        if (channelInfo != null) {
+            bufferInfo.setTotalReads(channelInfo.getBytesRead());
+            bufferInfo.setTotalWrites(channelInfo.getBytesWritten());
+        }
+        
+        // 计算内存利用率
+        bufferInfo.calculateMemoryUtilization();
+        bufferInfo.addUsageSnapshot();
+    }
+    
+    /**
+     * 从ChannelInfo填充缓冲区信息
+     */
+    private void populateBufferInfoFromChannelInfo(BufferInfo bufferInfo, ChannelInfo channelInfo) {
+        bufferInfo.setApplicationName(channelInfo.getApplicationName());
+        
+        // 根据传输的数据量估算缓冲区大小
+        long totalBytes = channelInfo.getBytesRead() + channelInfo.getBytesWritten();
+        int estimatedCapacity = Math.max(1024, (int) Math.min(totalBytes, 65536));
+        
+        bufferInfo.setCapacity(estimatedCapacity);
+        bufferInfo.setMaxCapacity(65536);
+        bufferInfo.setReadableBytes((int) Math.min(channelInfo.getBytesRead(), estimatedCapacity));
+        bufferInfo.setWritableBytes(estimatedCapacity - (int) Math.min(channelInfo.getBytesWritten(), estimatedCapacity));
+        bufferInfo.setReaderIndex(0);
+        bufferInfo.setWriterIndex((int) Math.min(channelInfo.getBytesWritten(), estimatedCapacity));
+        bufferInfo.setDirect(true);
+        bufferInfo.setHasArray(false);
+        bufferInfo.setRefCount(1);
+        bufferInfo.setBufferType("RemoteByteBuf");
+        bufferInfo.setContent("Remote channel - estimated buffer info");
+        
+        // 统计信息
+        bufferInfo.setTotalReads(channelInfo.getBytesRead());
+        bufferInfo.setTotalWrites(channelInfo.getBytesWritten());
+        bufferInfo.setTotalAllocations(1);
+        bufferInfo.setTotalDeallocations(channelInfo.isActive() ? 0 : 1);
+        
+        // 内存使用情况
+        bufferInfo.setUsedMemory(estimatedCapacity - bufferInfo.getWritableBytes());
+        bufferInfo.setAllocatedMemory(estimatedCapacity);
+        
+        // 计算内存利用率
+        bufferInfo.calculateMemoryUtilization();
+        bufferInfo.addUsageSnapshot();
+    }
+    
+    /**
+     * 填充默认缓冲区信息
+     */
+    private void populateDefaultBufferInfo(BufferInfo bufferInfo) {
+        bufferInfo.setApplicationName("Unknown");
+        bufferInfo.setCapacity(0);
+        bufferInfo.setMaxCapacity(0);
+        bufferInfo.setReadableBytes(0);
+        bufferInfo.setWritableBytes(0);
+        bufferInfo.setReaderIndex(0);
+        bufferInfo.setWriterIndex(0);
+        bufferInfo.setDirect(false);
+        bufferInfo.setHasArray(false);
+        bufferInfo.setRefCount(0);
+        bufferInfo.setBufferType("Unknown");
+        bufferInfo.setContent("Channel not found");
+        
+        bufferInfo.setTotalReads(0);
+        bufferInfo.setTotalWrites(0);
+        bufferInfo.setTotalAllocations(0);
+        bufferInfo.setTotalDeallocations(0);
+        bufferInfo.setUsedMemory(0);
+        bufferInfo.setAllocatedMemory(0);
+        bufferInfo.setMemoryUtilization(0);
+    }
+    
+    /**
+     * 更新缓冲区统计信息
+     */
+    private void updateBufferStats() {
+        // 为所有活跃的Channel创建或更新缓冲区信息
+        Set<String> activeChannelIds = new HashSet<>();
+        
+        // 处理本地Channel
+        for (Channel channel : monitoredChannels) {
+            String channelId = channel.id().asShortText();
+            activeChannelIds.add(channelId);
+            
+            BufferInfo bufferInfo = bufferStats.get(channelId);
+            if (bufferInfo == null) {
+                bufferInfo = createBufferInfoFromChannel(channelId);
+                if (bufferInfo != null) {
+                    bufferStats.put(channelId, bufferInfo);
+                }
+            } else {
+                // 更新现有缓冲区信息
+                bufferInfo.setLastUpdateTime(LocalDateTime.now());
+                bufferInfo.addUsageSnapshot();
+            }
+        }
+        
+        // 处理远程Channel
+        for (String channelId : channelStats.keySet()) {
+            activeChannelIds.add(channelId);
+            
+            BufferInfo bufferInfo = bufferStats.get(channelId);
+            if (bufferInfo == null) {
+                bufferInfo = createBufferInfoFromChannel(channelId);
+                if (bufferInfo != null) {
+                    bufferStats.put(channelId, bufferInfo);
+                }
+            } else {
+                // 更新现有缓冲区信息
+                ChannelInfo channelInfo = channelStats.get(channelId);
+                if (channelInfo != null) {
+                    populateBufferInfoFromChannelInfo(bufferInfo, channelInfo);
+                }
+            }
+        }
+        
+        // 清理不活跃的缓冲区信息
+        bufferStats.entrySet().removeIf(entry -> {
+            String channelId = entry.getKey();
+            BufferInfo bufferInfo = entry.getValue();
+            
+            // 如果Channel不再活跃且超过5分钟没有更新，则移除
+            boolean shouldRemove = !activeChannelIds.contains(channelId) &&
+                    bufferInfo.getLastUpdateTime() != null &&
+                    bufferInfo.getLastUpdateTime().isBefore(LocalDateTime.now().minusMinutes(5));
+            
+            if (shouldRemove) {
+                log.debug("Removed inactive buffer info for channel: {}", channelId);
+            }
+            
+            return shouldRemove;
+        });
+    }
+    
+    /**
+     * 注册缓冲区信息
+     */
+    public void registerBufferInfo(String channelId, BufferInfo bufferInfo) {
+        if (bufferInfo != null) {
+            bufferInfo.setChannelId(channelId);
+            bufferInfo.setLastUpdateTime(LocalDateTime.now());
+            bufferStats.put(channelId, bufferInfo);
+            log.debug("Buffer info registered for channel: {}", channelId);
+        }
+    }
+    
+    /**
+     * 更新缓冲区使用情况
+     */
+    public void updateBufferUsage(String channelId, int capacity, int readableBytes, int writableBytes) {
+        BufferInfo bufferInfo = bufferStats.get(channelId);
+        if (bufferInfo != null) {
+            bufferInfo.setCapacity(capacity);
+            bufferInfo.setReadableBytes(readableBytes);
+            bufferInfo.setWritableBytes(writableBytes);
+            bufferInfo.setLastUpdateTime(LocalDateTime.now());
+            bufferInfo.calculateMemoryUtilization();
+            bufferInfo.addUsageSnapshot();
+        }
     }
     
     /**

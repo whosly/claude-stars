@@ -119,8 +119,10 @@ public class MonitorAgent {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
-            conn.setConnectTimeout(5000); // 5秒连接超时
-            conn.setReadTimeout(5000);    // 5秒读取超时
+            // 5秒连接超时
+            conn.setConnectTimeout(5000);
+            // 5秒读取超时
+            conn.setReadTimeout(5000);
             
             try (OutputStream os = conn.getOutputStream()) {
                 os.write(jsonData.getBytes());

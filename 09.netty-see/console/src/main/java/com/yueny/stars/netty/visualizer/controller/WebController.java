@@ -31,6 +31,11 @@ public class WebController {
         return "performance";
     }
     
+    @GetMapping("/buffers")
+    public String buffers() {
+        return "buffers";
+    }
+    
     @GetMapping("/errors")
     public String errors() {
         return "errors";

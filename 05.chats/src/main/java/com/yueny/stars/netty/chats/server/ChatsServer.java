@@ -2,7 +2,6 @@ package com.yueny.stars.netty.chats.server;
 
 import com.yueny.stars.netty.chats.ConfigLoader;
 import com.yueny.stars.netty.core.socket.server.AbstractChatServer;
-import com.yueny.stars.netty.monitor.agent.NettyMonitorAgent;
 import com.yueny.stars.netty.monitor.agent.annotation.NettyMonitor;
 
 import java.util.function.Consumer;
@@ -34,10 +33,6 @@ public class ChatsServer extends AbstractChatServer {
     }
 
     public static void main(String[] args) throws Exception {
-        // 手动启用监控（包含端口信息）
-        NettyMonitorAgent.initialize("ChatsServer-" + INSTANCE.port);
-        System.out.println("监控代理已启用，应用名称: ChatsServer-" + INSTANCE.port);
-
         INSTANCE.start(INSTANCE.port, new ChatsServerInitializer(), new Consumer<String>() {
             @Override
             public void accept(String text) {

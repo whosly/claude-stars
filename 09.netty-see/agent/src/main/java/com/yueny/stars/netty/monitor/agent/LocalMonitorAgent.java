@@ -45,7 +45,8 @@ public class LocalMonitorAgent {
         // 检查操作系统，Windows使用TCP，Unix使用LocalChannel
         String os = System.getProperty("os.name").toLowerCase();
         this.useLocalChannel = !os.contains("win");
-        this.tcpPort = 19999; // 监控专用端口
+        // 监控专用端口
+        this.tcpPort = 19999;
     }
     
     /**

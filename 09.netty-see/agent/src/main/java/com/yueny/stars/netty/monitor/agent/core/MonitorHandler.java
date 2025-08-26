@@ -28,23 +28,21 @@ public class MonitorHandler extends ChannelInboundHandlerAdapter {
         
         try {
             ChannelInfo channelInfo = createChannelInfo(ctx);
-            logger.info("✅ MonitorHandler: Channel active - %s", ctx.channel().id().asShortText());
-            System.out.println("🔥 MonitorHandler: Channel active - " + ctx.channel().id().asShortText());
+            logger.info("MonitorHandler: Channel active - %s", ctx.channel().id().asShortText());
             
             // 如果监控代理已连接，立即发送；否则缓存事件
             if (agent != null && agent.isConnected()) {
                 agent.sendChannelInfo(channelInfo, "CHANNEL_ACTIVE");
-                logger.info("✅ MonitorHandler: Sent channel active immediately");
-                System.out.println("📤 MonitorHandler: Sent channel active immediately for " + channelInfo.getChannelId());
+                logger.info("MonitorHandler: Sent channel active immediately for %s" + channelInfo.getChannelId());
             } else {
                 // 缓存事件，等待连接建立后发送
                 pendingEvents.add(() -> {
                     if (agent != null) {
                         agent.sendChannelInfo(channelInfo, "CHANNEL_ACTIVE");
-                        logger.info("📤 MonitorHandler: Sent cached CHANNEL_ACTIVE for %s", channelInfo.getChannelId());
+                        logger.info("MonitorHandler: Sent cached CHANNEL_ACTIVE for %s", channelInfo.getChannelId());
                     }
                 });
-                logger.info("📦 MonitorHandler: Cached CHANNEL_ACTIVE event (agent not connected yet)");
+                logger.info("MonitorHandler: Cached CHANNEL_ACTIVE event (agent not connected yet)");
                 
                 // 启动一个任务定期检查连接状态并发送缓存的事件
                 scheduleEventFlush();
@@ -59,17 +57,19 @@ public class MonitorHandler extends ChannelInboundHandlerAdapter {
      * 定期检查连接状态并发送缓存的事件
      */
     private void scheduleEventFlush() {
-        if (pendingEvents.isEmpty()) return;
+        if (pendingEvents.isEmpty()) {
+            return;
+        }
         
         // 使用EventLoop来调度任务
         ctx.channel().eventLoop().schedule(() -> {
             if (agent != null && agent.isConnected() && !pendingEvents.isEmpty()) {
-                logger.info("🔄 MonitorHandler: Flushing %s cached events", pendingEvents.size());
+                logger.info("MonitorHandler: Flushing %s cached events", pendingEvents.size());
                 for (Runnable event : pendingEvents) {
                     try {
                         event.run();
                     } catch (Exception e) {
-                        logger.warn("❌ Error flushing cached event:: %s", e.getMessage());
+                        logger.warn("Error flushing cached event:: %s", e.getMessage());
                     }
                 }
                 pendingEvents.clear();
@@ -97,10 +97,13 @@ public class MonitorHandler extends ChannelInboundHandlerAdapter {
         try {
             ChannelInfo channelInfo = createChannelInfo(ctx);
             
-            // 记录读取的数据大小
+            // 记录读取的数据大小和缓冲区信息
             if (msg instanceof ByteBuf) {
                 ByteBuf buf = (ByteBuf) msg;
                 channelInfo.setBytesRead(channelInfo.getBytesRead() + buf.readableBytes());
+                
+                // 收集缓冲区信息
+                collectBufferInfo(channelInfo, buf);
             }
             
             agent.sendChannelInfo(channelInfo, "CHANNEL_READ");
@@ -111,6 +114,60 @@ public class MonitorHandler extends ChannelInboundHandlerAdapter {
             logger.warn("Failed to send channel read info: %s", e.getMessage());
         }
         super.channelRead(ctx, msg);
+    }
+    
+    /**
+     * 收集缓冲区信息
+     */
+    private void collectBufferInfo(ChannelInfo channelInfo, ByteBuf buf) {
+        try {
+            // 创建缓冲区信息映射
+            java.util.Map<String, Object> bufferInfo = new java.util.HashMap<>();
+            
+            bufferInfo.put("capacity", buf.capacity());
+            bufferInfo.put("maxCapacity", buf.maxCapacity());
+            bufferInfo.put("readableBytes", buf.readableBytes());
+            bufferInfo.put("writableBytes", buf.writableBytes());
+            bufferInfo.put("readerIndex", buf.readerIndex());
+            bufferInfo.put("writerIndex", buf.writerIndex());
+            bufferInfo.put("isDirect", buf.isDirect());
+            bufferInfo.put("hasArray", buf.hasArray());
+            bufferInfo.put("refCount", buf.refCnt());
+            bufferInfo.put("bufferType", buf.getClass().getSimpleName());
+            
+            // 计算内存利用率
+            double utilization = buf.capacity() > 0 ? 
+                (double) (buf.capacity() - buf.writableBytes()) / buf.capacity() * 100 : 0;
+            bufferInfo.put("memoryUtilization", utilization);
+            
+            // 获取缓冲区内容的前64字节（用于调试）
+            if (buf.readableBytes() > 0) {
+                int readableBytes = Math.min(buf.readableBytes(), 64);
+                byte[] content = new byte[readableBytes];
+                buf.getBytes(buf.readerIndex(), content);
+                bufferInfo.put("contentPreview", bytesToHex(content));
+            }
+            
+            // 将缓冲区信息添加到ChannelInfo中
+            channelInfo.setBufferInfo(bufferInfo);
+            
+            logger.trace("Collected buffer info: capacity=%d, readable=%d, writable=%d, utilization=%.2f%%",
+                    buf.capacity(), buf.readableBytes(), buf.writableBytes(), utilization);
+                    
+        } catch (Exception e) {
+            logger.warn("Failed to collect buffer info: %s", e.getMessage());
+        }
+    }
+    
+    /**
+     * 将字节数组转换为十六进制字符串
+     */
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte b : bytes) {
+            result.append(String.format("%02x ", b));
+        }
+        return result.toString().trim();
     }
     
     @Override
@@ -211,7 +268,9 @@ public class MonitorHandler extends ChannelInboundHandlerAdapter {
      * 获取异常堆栈信息
      */
     private String getStackTrace(Throwable throwable) {
-        if (throwable == null) return "";
+        if (throwable == null) {
+            return "";
+        }
         
         StringBuilder sb = new StringBuilder();
         sb.append(throwable.getClass().getName()).append(": ").append(throwable.getMessage()).append("\n");

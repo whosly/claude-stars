@@ -76,7 +76,6 @@ class ChatsServerHandler extends SimpleChannelInboundHandler<Message> {
 
         // 检查消息是否有效
         if (!msg.isValid()) {
-            System.out.println("收到无效消息，忽略处理 - " + getDisplayName(incoming));
             return;
         }
 
