@@ -193,6 +193,10 @@ Acceptor主要任务就是构建handler ，在获取到和client相关的SocketC
 - 智能注解系统和动态模板解析
 - 📖 [完整文档](./09.netty-see/README.md)
 
+![index](./09.netty-see/static/netty-see-index.png)
+
+![channel-detail](./09.netty-see/static/netty-see-channel-detail.png)
+
 **核心特性：**
 - **智能注解**: `@NettyMonitor` 注解即可启用监控
 - **动态模板**: 支持 `${username}`、`${server.port}` 等变量
