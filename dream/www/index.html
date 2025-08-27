@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netty-Stars - 基于JDK1.8的Netty理论学习与实践项目</title>
+    <meta name="description" content="Netty-Stars是一个完整的Netty学习项目，包含从基础到高级的多个模块，涵盖服务器-客户端、聊天系统、监控系统等实践案例">
+    <meta name="keywords" content="Netty,Java,NIO,网络编程,聊天系统,监控系统,学习项目">
+    
+    <!-- 引入Font Awesome图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 引入外部样式和脚本 -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        /* 主要内容 */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem 0;
+        }
+
+        /* 英雄区域 */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* 特性区域 */
+        .features {
+            background: white;
+            padding: 4rem 0;
+            margin: 2rem 0;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #333;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* 模块展示 */
+        .modules {
+            background: #f8f9fa;
+            padding: 4rem 0;
+            margin: 2rem 0;
+            border-radius: 20px;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .module-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .module-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .module-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+
+        .module-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .module-description {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .module-features {
+            list-style: none;
+        }
+
+        .module-features li {
+            padding: 0.3rem 0;
+            color: #555;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .module-features li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        /* 快速开始 */
+        .quick-start {
+            background: white;
+            padding: 4rem 0;
+            margin: 2rem 0;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+
+        .code-block pre {
+            margin: 0;
+        }
+
+        .code-block code {
+            color: #81e6d9;
+        }
+
+        /* 学习路径 */
+        .learning-path {
+            background: #f8f9fa;
+            padding: 4rem 0;
+            margin: 2rem 0;
+            border-radius: 20px;
+        }
+
+        .path-timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 3rem auto 0;
+        }
+
+        .path-timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #667eea;
+            transform: translateX(-50%);
+        }
+
+        .path-item {
+            position: relative;
+            margin: 2rem 0;
+            width: 45%;
+        }
+
+        .path-item:nth-child(odd) {
+            left: 0;
+            text-align: right;
+        }
+
+        .path-item:nth-child(even) {
+            left: 55%;
+            text-align: left;
+        }
+
+        .path-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .path-item:nth-child(odd) .path-content::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            width: 0;
+            height: 0;
+            border-left: 10px solid white;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            transform: translateY(-50%);
+        }
+
+        .path-item:nth-child(even) .path-content::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            width: 0;
+            height: 0;
+            border-right: 10px solid white;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            transform: translateY(-50%);
+        }
+
+        .path-number {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 页脚 */
+        .footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: #667eea;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .path-timeline::before {
+                left: 20px;
+            }
+
+            .path-item {
+                width: 100%;
+                left: 0 !important;
+                text-align: left !important;
+                margin-left: 50px;
+            }
+
+            .path-item .path-content::after {
+                display: none;
+            }
+
+            .path-number {
+                left: 20px;
+                transform: translateY(-50%);
+            }
+
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5a6fd8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="#" class="logo">
+                    <i class="fas fa-star"></i> Netty-Stars
+                </a>
+                <ul class="nav-links">
+                    <li><a href="#features">特性</a></li>
+                    <li><a href="#modules">模块</a></li>
+                    <li><a href="#quick-start">快速开始</a></li>
+                    <li><a href="#learning-path">学习路径</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="main-content">
+        <!-- 英雄区域 -->
+        <section class="hero">
+            <div class="container">
+                <h1 class="fade-in-up">Netty-Stars</h1>
+                <p class="fade-in-up">基于 JDK1.8 的 Netty 理论学习与实践项目</p>
+                <div class="hero-buttons fade-in-up">
+                    <a href="#quick-start" class="btn btn-primary">
+                        <i class="fas fa-rocket"></i> 快速开始
+                    </a>
+                    <a href="https://gitee.com/whosly/netty-stars" class="btn btn-secondary" target="_blank">
+                        <i class="fab fa-github"></i> 查看源码
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 特性区域 -->
+        <section class="features" id="features">
+            <div class="container">
+                <h2 class="section-title">项目特性</h2>
+                
+                <!-- 统计信息 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">11</div>
+                        <div class="stat-label">核心模块</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">聊天系统</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">监控方案</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">开源免费</div>
+                    </div>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>系统化学习</h3>
+                        <p>从基础概念到高级应用，循序渐进的学习路径，适合不同水平的学习者</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h3>实践导向</h3>
+                        <p>每个模块都有完整的示例代码，理论与实践相结合，快速掌握Netty核心概念</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h3>生产级特性</h3>
+                        <p>包含监控系统、性能测试等企业级功能，为实际项目开发提供参考</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3>跨平台支持</h3>
+                        <p>支持Linux、macOS、Windows等多个平台，提供Unix Domain Socket等高级特性</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 模块展示 -->
+        <section class="modules" id="modules">
+            <div class="container">
+                <h2 class="module-title">项目模块</h2>
+                
+                <!-- 搜索框 -->
+                <div class="search-container">
+                    <input type="text" class="search-box" placeholder="搜索模块功能..." id="searchBox">
+                </div>
+                <div class="modules-grid">
+                    <div class="module-card">
+                        <div class="module-header">
+                            <div class="module-number">01</div>
+                            <h3 class="module-title">基础入门</h3>
+                        </div>
+                        <p class="module-description">Echo服务器和客户端基础实现，学习Netty的基本使用方式</p>
+                        <ul class="module-features">
+                            <li>构建最基本的Echo Server和Client</li>
+                            <li>理解服务器-客户端通信模型</li>
+                            <li>学习Netty的基本使用方式</li>
+                        </ul>
+                    </div>
+
+                    <div class="module-card">
+                        <div class="module-header">
+                            <div class="module-number">04-05</div>
+                            <h3 class="module-title">聊天系统</h3>
+                        </div>
+                        <p class="module-description">从基础聊天到高级聊天室的完整演进，支持多客户端和私聊功能</p>
+                        <ul class="module-features">
+                            <li>实时消息发送和接收</li>
+                            <li>支持多客户端同时聊天</li>
+                            <li>昵称显示与系统提示功能</li>
+                            <li>支持命令操作和私聊功能</li>
+                        </ul>
+                    </div>
+
+                    <div class="module-card">
+                        <div class="module-header">
+                            <div class="module-number">06-07</div>
+                            <h3 class="module-title">核心技术</h3>
+                        </div>
+                        <p class="module-description">ByteBuf缓冲区和Channel通道的深度学习，掌握Netty核心机制</p>
+                        <ul class="module-features">
+                            <li>ByteBuf分配器和缓冲区类型</li>
+                            <li>多种Channel类型的实现</li>
+                            <li>解决JDK ByteBuffer的局限性</li>
+                            <li>支持多种通信协议</li>
+                        </ul>
+                    </div>
+
+                    <div class="module-card">
+                        <div class="module-header">
+                            <div class="module-number">09</div>
+                            <h3 class="module-title">监控系统</h3>
+                        </div>
+                        <p class="module-description">专为Netty应用设计的完整监控解决方案，支持智能注解和动态模板</p>
+                        <ul class="module-features">
+                            <li>智能注解系统</li>
+                            <li>动态模板解析</li>
+                            <li>无侵入集成</li>
+                            <li>实时监控和Web控制台</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 快速开始 -->
+        <section class="quick-start" id="quick-start">
+            <div class="container">
+                <h2 class="section-title">快速开始</h2>
+                
+                <h3><i class="fas fa-download"></i> 环境要求</h3>
+                <div class="code-block">
+                    <pre><code>JDK 1.8+ (推荐 azul-1.8.0_442 或更高版本)
+Maven 3.3.9 或更高版本</code></pre>
+                </div>
+
+                <h3><i class="fas fa-cogs"></i> 构建项目</h3>
+                <div class="code-block">
+                    <pre><code># 构建所有模块
+mvn clean install
+
+# 构建单个模块
+mvn install -pl utils
+mvn install -pl 05.chats</code></pre>
+                </div>
+
+                <h3><i class="fas fa-play"></i> 运行示例</h3>
+                <div class="code-block">
+                    <pre><code># 启动聊天服务器
+cd 05.chats
+mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.chats.server.ChatsServer"
+
+# 启动聊天客户端
+mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.chats.client.ChatsClient"</code></pre>
+                </div>
+
+                <h3><i class="fas fa-eye"></i> 监控系统体验</h3>
+                <div class="code-block">
+                    <pre><code># 启动监控控制台
+cd 09.netty-see/console
+mvn spring-boot:run
+
+# 访问 http://localhost:8081 查看监控面板</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- 学习路径 -->
+        <section class="learning-path" id="learning-path">
+            <div class="container">
+                <h2 class="section-title">推荐学习路径</h2>
+                <div class="path-timeline">
+                    <div class="path-item">
+                        <div class="path-number">1</div>
+                        <div class="path-content">
+                            <h4>基础概念</h4>
+                            <p>从01.server-and-client开始，了解Netty基本使用</p>
+                        </div>
+                    </div>
+                    <div class="path-item">
+                        <div class="path-number">2</div>
+                        <div class="path-content">
+                            <h4>编解码器</h4>
+                            <p>学习03.handler-decoder，掌握数据处理机制</p>
+                        </div>
+                    </div>
+                    <div class="path-item">
+                        <div class="path-number">3</div>
+                        <div class="path-content">
+                            <h4>实际应用</h4>
+                            <p>构建04.chat聊天系统，体验实际应用场景</p>
+                        </div>
+                    </div>
+                    <div class="path-item">
+                        <div class="path-number">4</div>
+                        <div class="path-content">
+                            <h4>核心技术</h4>
+                            <p>深入06.netty-buffer和07.netty-channel</p>
+                        </div>
+                    </div>
+                    <div class="path-item">
+                        <div class="path-number">5</div>
+                        <div class="path-content">
+                            <h4>高级特性</h4>
+                            <p>学习09.netty-see监控系统，构建生产级应用</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <p>&copy; 2025 Netty-Stars. 基于JDK1.8的Netty学习项目</p>
+                </div>
+                <div class="social-links">
+                    <a href="https://gitee.com/whosly/netty-stars" title="GitHub" target="_blank"><i class="fab fa-github"></i></a>
+                    <a href="https://gitee.com/whosly/netty-stars/blob/master/README.md" title="文档" target="_blank"><i class="fas fa-book"></i></a>
+                    <a href="https://gitee.com/whosly/netty-stars/issues" title="问题反馈" target="_blank"><i class="fas fa-bug"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 引入外部脚本 -->
+    <script src="script.js"></script>
+    
+    <!-- 调试信息 -->
+    <script>
+        // 页面加载完成后检查主题切换功能
+        window.addEventListener('load', () => {
+            console.log('页面加载完成');
+            console.log('主题切换按钮是否存在:', !!document.querySelector('.theme-toggle'));
+            console.log('当前主题:', document.body.classList.contains('dark-theme') ? '深色' : '浅色');
+            console.log('本地存储的主题:', localStorage.getItem('theme'));
+        });
+    </script>
+</body>
+</html>

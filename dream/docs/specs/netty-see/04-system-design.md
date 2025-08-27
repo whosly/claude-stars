@@ -11,6 +11,7 @@ Netty-See 是一个专为 Netty 应用设计的实时监控系统，提供 Chann
 - **轻量级**：内置简单的 JSON 和日志工具，最小化资源占用
 - **高可用**：监控故障不影响业务系统，提供降级处理机制
 - **实时性**：实时数据收集和传输，Web 控制台实时展示
+- **缓冲区监控**：实时监控 ByteBuf 使用情况和内存管理
 
 
 ## 架构设计 Architecture
@@ -816,3 +817,105 @@ MonitorContextManager.clearThreadContext(); // 在请求结束时清理
 - **高可用设计**：监控故障不影响业务
 - **实时监控**：TCP 长连接实时数据传输
 - **模板化配置**：支持动态变量替换
+##
+ 缓冲区监控系统 - 已实现 ✅
+
+### 核心功能
+1. **实时缓冲区监控**
+   - 容量监控：当前容量和最大容量
+   - 使用率监控：实时计算内存利用率
+   - 索引监控：跟踪读写索引变化
+   - 引用计数监控：监控 ByteBuf 引用计数
+
+2. **缓冲区类型识别**
+   - 直接缓冲区：监控堆外内存使用
+   - 堆缓冲区：监控堆内存使用
+   - 缓冲区类型统计：统计不同类型使用情况
+
+3. **历史趋势分析**
+   - 使用历史：记录缓冲区使用快照
+   - 趋势图表：可视化缓冲区使用趋势
+   - 性能统计：读写操作和分配统计
+
+### 技术实现
+
+#### 数据收集层 (Agent)
+```java
+// MonitorHandler 增强缓冲区信息收集
+private void collectBufferInfo(ChannelInfo channelInfo, ByteBuf buf) {
+    Map<String, Object> bufferInfo = new HashMap<>();
+    bufferInfo.put("capacity", buf.capacity());
+    bufferInfo.put("readableBytes", buf.readableBytes());
+    bufferInfo.put("writableBytes", buf.writableBytes());
+    bufferInfo.put("isDirect", buf.isDirect());
+    bufferInfo.put("refCount", buf.refCnt());
+    // 计算内存利用率
+    double utilization = buf.capacity() > 0 ? 
+        (double) (buf.capacity() - buf.writableBytes()) / buf.capacity() * 100 : 0;
+    bufferInfo.put("memoryUtilization", utilization);
+    channelInfo.setBufferInfo(bufferInfo);
+}
+```
+
+#### 数据处理层 (Console)
+```java
+// BufferInfo 完整数据模型
+@Data
+public class BufferInfo {
+    private String channelId;
+    private String applicationName;
+    private int capacity;
+    private int maxCapacity;
+    private int readableBytes;
+    private int writableBytes;
+    private boolean isDirect;
+    private int refCount;
+    private double memoryUtilization;
+    private List<BufferUsageSnapshot> usageHistory;
+    // 统计信息
+    private long totalReads;
+    private long totalWrites;
+    private long totalAllocations;
+}
+```
+
+#### API 接口
+- `GET /api/netty/buffers` - 获取所有缓冲区信息
+- `GET /api/netty/channels/{channelId}/buffer` - 获取指定缓冲区信息
+- `POST /api/netty/buffers/{channelId}/usage` - 更新缓冲区使用情况
+
+#### 前端可视化
+- **缓冲区监控页面** (`/buffers`)：完整的缓冲区监控界面
+- **实时统计面板**：总缓冲区数、总容量、平均利用率
+- **缓冲区列表**：详细的缓冲区信息展示
+- **趋势图表**：使用 Chart.js 的实时趋势分析
+- **详情模态框**：单个缓冲区的详细信息
+
+### 监控指标
+- **基础指标**：capacity, readableBytes, writableBytes, readerIndex, writerIndex
+- **类型指标**：isDirect, hasArray, bufferType, refCount
+- **计算指标**：内存利用率、读写比率、分配效率
+- **聚合指标**：总缓冲区数、总容量、平均利用率、直接缓冲区比例
+
+### 数据流程
+```
+ByteBuf 操作 → MonitorHandler.collectBufferInfo() → ChannelInfo.bufferInfo → 
+MonitorAgent.sendChannelInfo() → LocalMonitorServer → NettyMonitorService.updateBufferInfoFromChannelInfo() →
+REST API → 前端可视化
+```
+
+### 性能优化
+- **采样策略**：对高频操作采用采样收集
+- **历史数据限制**：只保留最近50个使用快照
+- **定期清理**：清理过期的缓冲区信息
+- **异步处理**：缓冲区信息收集不阻塞业务逻辑
+
+### 使用场景
+1. **内存泄漏排查**：通过引用计数和使用历史排查内存泄漏
+2. **性能优化**：通过缓冲区使用情况优化内存使用
+3. **容量规划**：根据实际使用情况规划缓冲区容量
+4. **实时监控**：实时监控生产环境的缓冲区使用情况
+
+## 总结
+
+Netty-See 监控系统通过智能注解、模板解析、错误处理和缓冲区监控等核心功能，为 Netty 应用提供了完整的监控解决方案。系统采用嵌入式部署方式，通过无侵入的监控机制，实现了对 Netty 应用的全方位监控，包括 Channel 生命周期、性能指标、缓冲区使用情况等关键信息的实时收集和可视化展示。

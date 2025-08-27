@@ -40,4 +40,9 @@ public class WebController {
     public String errors() {
         return "errors";
     }
+    
+    @GetMapping("/statistics")
+    public String statistics() {
+        return "statistics";
+    }
 }

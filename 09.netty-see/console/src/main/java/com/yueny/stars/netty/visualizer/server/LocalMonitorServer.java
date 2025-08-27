@@ -229,6 +229,9 @@ public class LocalMonitorServer {
                     case "CHANNEL_READ":
                         handleChannelRead(message);
                         break;
+                    case "CHANNEL_WRITE":
+                        handleChannelWrite(message);
+                        break;
                     case "CHANNEL_EXCEPTION":
                         handleChannelException(message);
                         break;
@@ -267,7 +270,10 @@ public class LocalMonitorServer {
                 // 转换为console模块的ChannelInfo
                 com.yueny.stars.netty.visualizer.model.ChannelInfo channelInfo = 
                         convertChannelInfo(message.getChannelInfo(), message.getApplicationName());
-                monitorService.registerChannel(channelInfo);
+                
+                // 使用新的事件处理方法，集成统计功能
+                monitorService.processChannelEvent(channelInfo, "CHANNEL_ACTIVE");
+                
                 log.info("Channel registered: {} from {}", 
                         channelInfo.getChannelId(), message.getApplicationName());
                 System.out.println("✅ LocalMonitorServer: Channel registered: " + channelId + " from " + appName);
@@ -286,18 +292,36 @@ public class LocalMonitorServer {
                     channels.remove(channelId);
                 }
                 
-                // 先标记为关闭状态，而不是立即移除
-                monitorService.markChannelClosed(channelId);
+                // 转换ChannelInfo并处理事件
+                com.yueny.stars.netty.visualizer.model.ChannelInfo channelInfo = 
+                        convertChannelInfo(message.getChannelInfo(), message.getApplicationName());
+                
+                // 使用新的事件处理方法，集成统计功能
+                monitorService.processChannelEvent(channelInfo, "CHANNEL_INACTIVE");
+                
                 log.debug("Channel marked as closed: {} from {}", channelId, appName);
             }
         }
         
         private void handleChannelRead(MonitorMessage message) {
             if (message.getChannelInfo() != null) {
-                // 更新Channel统计信息
+                // 转换ChannelInfo并处理事件
                 com.yueny.stars.netty.visualizer.model.ChannelInfo channelInfo = 
                         convertChannelInfo(message.getChannelInfo(), message.getApplicationName());
-                monitorService.updateChannelInfo(channelInfo);
+                
+                // 使用新的事件处理方法，集成统计功能
+                monitorService.processChannelEvent(channelInfo, "CHANNEL_READ");
+            }
+        }
+        
+        private void handleChannelWrite(MonitorMessage message) {
+            if (message.getChannelInfo() != null) {
+                // 转换ChannelInfo并处理事件
+                com.yueny.stars.netty.visualizer.model.ChannelInfo channelInfo = 
+                        convertChannelInfo(message.getChannelInfo(), message.getApplicationName());
+                
+                // 使用新的事件处理方法，集成统计功能
+                monitorService.processChannelEvent(channelInfo, "CHANNEL_WRITE");
             }
         }
         
@@ -307,8 +331,8 @@ public class LocalMonitorServer {
                 com.yueny.stars.netty.visualizer.model.ChannelInfo channelInfo = 
                         convertChannelInfo(message.getChannelInfo(), message.getApplicationName());
                 
-                // 处理异常统计
-                monitorService.handleChannelException(channelInfo);
+                // 使用新的事件处理方法，集成统计功能
+                monitorService.processChannelEvent(channelInfo, "CHANNEL_EXCEPTION");
                 
                 log.warn("Channel exception in {}: {} - {}", 
                         message.getApplicationName(),
@@ -376,6 +400,13 @@ public class LocalMonitorServer {
             
             // 添加应用名称信息
             consoleInfo.setApplicationName(appName);
+            
+            // 添加用户名和角色信息 (暂时注释，等待agent模块更新)
+            // consoleInfo.setUsername(agentInfo.getUsername());
+            // consoleInfo.setChannelRole(agentInfo.getChannelRole());
+            
+            // 添加缓冲区信息 (暂时注释，等待agent模块更新)
+            // consoleInfo.setBufferInfo(agentInfo.getBufferInfo());
             
             return consoleInfo;
         }

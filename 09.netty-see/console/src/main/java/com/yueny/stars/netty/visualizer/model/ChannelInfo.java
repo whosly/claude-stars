@@ -29,4 +29,7 @@ public class ChannelInfo {
     private String errorMessage;     // 错误消息
     private String errorType;        // 错误类型
     private String stackTrace;       // 堆栈跟踪
+    private String username;         // 用户名信息
+    private String channelRole;      // channel角色：CLIENT 或 SERVER
+    private java.util.Map<String, Object> bufferInfo;  // 缓冲区信息
 }

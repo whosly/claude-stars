@@ -19,8 +19,8 @@ import java.util.function.Consumer;
  * @date 2025-08-18 17:03:50
  * @description
  */
-@NettyMonitor(applicationName = "ChatsServer-${username}-${server.port}", lazyInit = true, initTimeout = 10000,
-        retryCount = 3,  retryInterval = 1000)
+//@NettyMonitor(applicationName = "ChatsServer-${username}-${server.port}", lazyInit = true, initTimeout = 10000,
+//        retryCount = 3,  retryInterval = 1000)
 public class ChatsClient extends AbstractChatClient {
     private static final String HOST = ConfigLoader.getServerHost();
     private static final int PORT = ConfigLoader.getServerPort();
@@ -53,9 +53,9 @@ public class ChatsClient extends AbstractChatClient {
         String clientAlias = "ChatsClient-" + PORT + "-" + clientName;
 
         // NettyMonitor 方式， 不生效
-        MonitorContextManager.setGlobalContext("username", clientName);
+//        MonitorContextManager.setGlobalContext("username", clientName);
 //        // NettyMonitorAgent.initialize 方式， 手动启用客户端监控（包含端口信息）
-//        NettyMonitorAgent.initialize(clientAlias);
+        NettyMonitorAgent.initialize(clientAlias);
         System.out.println("✅ 客户端监控代理已启用，应用名称: " + clientAlias);
 
         ChatsClient chatClient = new ChatsClient(clientName);

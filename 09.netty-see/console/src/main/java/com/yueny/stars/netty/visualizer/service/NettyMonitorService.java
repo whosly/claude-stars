@@ -49,6 +49,10 @@ public class NettyMonitorService {
     @Autowired(required = false)
     private ErrorStatsService errorStatsService;
     
+    // 统计聚合服务
+    @Autowired(required = false)
+    private StatisticsAggregationService statisticsService;
+    
     /**
      * 注册Channel进行监控
      */
@@ -469,11 +473,93 @@ public class NettyMonitorService {
     public void registerChannel(ChannelInfo channelInfo) {
         if (channelInfo != null) {
             channelStats.put(channelInfo.getChannelId(), channelInfo);
+            
+            // 如果包含缓冲区信息，同时更新缓冲区统计
+            if (channelInfo.getBufferInfo() != null) {
+                updateBufferInfoFromChannelInfo(channelInfo);
+            }
+            
             log.info("Channel registered for monitoring: {} from {}", 
                     channelInfo.getChannelId(), channelInfo.getApplicationName());
             System.out.println("💾 NettyMonitorService: Stored channel: " + channelInfo.getChannelId() + 
                     " from " + channelInfo.getApplicationName() + " (Total: " + channelStats.size() + ")");
         }
+    }
+    
+    /**
+     * 从ChannelInfo更新缓冲区信息
+     */
+    private void updateBufferInfoFromChannelInfo(ChannelInfo channelInfo) {
+        if (channelInfo.getBufferInfo() == null) {
+            return;
+        }
+        
+        String channelId = channelInfo.getChannelId();
+        Map<String, Object> bufferData = channelInfo.getBufferInfo();
+        
+        BufferInfo bufferInfo = bufferStats.get(channelId);
+        if (bufferInfo == null) {
+            bufferInfo = new BufferInfo();
+            bufferInfo.setChannelId(channelId);
+            bufferStats.put(channelId, bufferInfo);
+        }
+        
+        // 更新缓冲区信息
+        bufferInfo.setApplicationName(channelInfo.getApplicationName());
+        bufferInfo.setLastUpdateTime(LocalDateTime.now());
+        
+        // 从Map中提取缓冲区数据
+        if (bufferData.containsKey("capacity")) {
+            bufferInfo.setCapacity((Integer) bufferData.get("capacity"));
+        }
+        if (bufferData.containsKey("maxCapacity")) {
+            bufferInfo.setMaxCapacity((Integer) bufferData.get("maxCapacity"));
+        }
+        if (bufferData.containsKey("readableBytes")) {
+            bufferInfo.setReadableBytes((Integer) bufferData.get("readableBytes"));
+        }
+        if (bufferData.containsKey("writableBytes")) {
+            bufferInfo.setWritableBytes((Integer) bufferData.get("writableBytes"));
+        }
+        if (bufferData.containsKey("readerIndex")) {
+            bufferInfo.setReaderIndex((Integer) bufferData.get("readerIndex"));
+        }
+        if (bufferData.containsKey("writerIndex")) {
+            bufferInfo.setWriterIndex((Integer) bufferData.get("writerIndex"));
+        }
+        if (bufferData.containsKey("isDirect")) {
+            bufferInfo.setDirect((Boolean) bufferData.get("isDirect"));
+        }
+        if (bufferData.containsKey("hasArray")) {
+            bufferInfo.setHasArray((Boolean) bufferData.get("hasArray"));
+        }
+        if (bufferData.containsKey("refCount")) {
+            bufferInfo.setRefCount((Integer) bufferData.get("refCount"));
+        }
+        if (bufferData.containsKey("bufferType")) {
+            bufferInfo.setBufferType((String) bufferData.get("bufferType"));
+        }
+        if (bufferData.containsKey("memoryUtilization")) {
+            bufferInfo.setMemoryUtilization((Double) bufferData.get("memoryUtilization"));
+        }
+        if (bufferData.containsKey("contentPreview")) {
+            bufferInfo.setContent("Buffer content preview: " + bufferData.get("contentPreview"));
+        }
+        
+        // 更新统计信息
+        bufferInfo.setTotalReads(channelInfo.getBytesRead());
+        bufferInfo.setTotalWrites(channelInfo.getBytesWritten());
+        
+        // 计算内存使用情况
+        if (bufferInfo.getCapacity() > 0) {
+            bufferInfo.setUsedMemory(bufferInfo.getCapacity() - bufferInfo.getWritableBytes());
+            bufferInfo.setAllocatedMemory(bufferInfo.getCapacity());
+        }
+        
+        // 添加使用快照
+        bufferInfo.addUsageSnapshot();
+        
+        log.debug("Updated buffer info from channel data: {}", channelId);
     }
     
     /**
@@ -484,6 +570,43 @@ public class NettyMonitorService {
             channelStats.put(channelInfo.getChannelId(), channelInfo);
             log.debug("Channel info updated: {}", channelInfo.getChannelId());
         }
+    }
+    
+    /**
+     * 处理Channel事件并更新统计
+     */
+    public void processChannelEvent(ChannelInfo channelInfo, String eventType) {
+        // 更新Channel信息
+        updateChannelInfo(channelInfo);
+        
+        // 处理缓冲区信息
+        if (channelInfo.getBufferInfo() != null) {
+            updateBufferInfoFromChannelInfo(channelInfo);
+        }
+        
+        // 发送到统计聚合服务
+        if (statisticsService != null) {
+            statisticsService.processChannelEvent(channelInfo, eventType);
+        }
+        
+        // 处理特定事件类型
+        switch (eventType) {
+            case "CHANNEL_ACTIVE":
+                recordChannelSuccess(channelInfo.getChannelId());
+                break;
+            case "CHANNEL_INACTIVE":
+                markChannelClosed(channelInfo.getChannelId());
+                break;
+            case "CHANNEL_EXCEPTION":
+                handleChannelException(channelInfo);
+                break;
+            case "CHANNEL_READ":
+            case "CHANNEL_WRITE":
+                recordChannelRequest(channelInfo.getChannelId());
+                break;
+        }
+        
+        log.debug("Processed channel event: {} for channel: {}", eventType, channelInfo.getChannelId());
     }
     
     /**
