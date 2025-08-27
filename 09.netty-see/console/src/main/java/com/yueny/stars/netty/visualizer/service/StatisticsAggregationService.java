@@ -205,6 +205,7 @@ public class StatisticsAggregationService {
                 break;
             case "CHANNEL_READ":
             case "CHANNEL_WRITE":
+                // 记录数据传输
                 appStats.recordDataTransfer(
                         channelInfo.getBytesRead(),
                         channelInfo.getBytesWritten(),
@@ -259,27 +260,60 @@ public class StatisticsAggregationService {
         String channelId = channelInfo.getChannelId();
         long currentTime = System.currentTimeMillis();
 
-        // 计算响应时间 (简化版本)
-        if ("CHANNEL_READ".equals(eventType)) {
-            lastRequestTime.put(channelId, currentTime);
-        } else if ("CHANNEL_WRITE".equals(eventType)) {
-            Long requestTime = lastRequestTime.get(channelId);
-            if (requestTime != null) {
-                double responseTime = currentTime - requestTime;
-                responseTimeBuffer.put(channelId, responseTime);
+        // 改进的请求-响应配对逻辑
+        switch (eventType) {
+            case "CHANNEL_READ":
+                // 读取事件可能是请求的开始
+                lastRequestTime.put(channelId, currentTime);
+                // 记录一个请求（不包含响应时间）
+                realTimeStats.recordRequest();
+                break;
+                
+            case "CHANNEL_WRITE":
+                // 写入事件可能是响应的发送
+                Long requestTime = lastRequestTime.remove(channelId); // 移除以避免重复计算
+                if (requestTime != null) {
+                    double responseTime = currentTime - requestTime;
+                    responseTimeBuffer.put(channelId, responseTime);
 
-                // 记录到实时统计
-                realTimeStats.recordRequest(responseTime);
-                if (!"CHANNEL_EXCEPTION".equals(eventType)) {
+                    // 记录到实时统计（包含响应时间）
+                    realTimeStats.recordRequest(responseTime);
+                    realTimeStats.recordSuccessfulRequest();
+
+                    // 记录到应用统计
+                    String applicationName = channelInfo.getApplicationName() != null ? 
+                            channelInfo.getApplicationName() : "Unknown";
+                    ApplicationStats appStats = getOrCreateApplicationStats(applicationName);
+                    appStats.recordRequest(responseTime, true);
+                    
+                    log.debug("Recorded successful request for channel {} with response time {}ms", 
+                            channelId, responseTime);
+                } else {
+                    // 没有对应的读取事件，可能是单独的写入操作
+                    realTimeStats.recordRequest();
                     realTimeStats.recordSuccessfulRequest();
                 }
-
+                break;
+                
+            case "CHANNEL_EXCEPTION":
+                // 异常事件，记录错误
+                realTimeStats.recordError();
+                
+                // 如果有未完成的请求，也要记录为请求
+                Long pendingRequestTime = lastRequestTime.remove(channelId);
+                if (pendingRequestTime != null) {
+                    double responseTime = currentTime - pendingRequestTime;
+                    realTimeStats.recordRequest(responseTime);
+                }
+                
                 // 记录到应用统计
-                String applicationName = channelInfo.getApplicationName() != null ? channelInfo.getApplicationName()
-                        : "Unknown";
+                String applicationName = channelInfo.getApplicationName() != null ? 
+                        channelInfo.getApplicationName() : "Unknown";
                 ApplicationStats appStats = getOrCreateApplicationStats(applicationName);
-                appStats.recordRequest(responseTime, !"CHANNEL_EXCEPTION".equals(eventType));
-            }
+                appStats.recordRequest(0, false); // 错误请求，响应时间设为0
+                
+                log.debug("Recorded error for channel {}", channelId);
+                break;
         }
     }
 
@@ -458,10 +492,72 @@ public class StatisticsAggregationService {
     // ==================== 查询接口 ====================
 
     /**
+     * 检查数据是否可用
+     */
+    public boolean isDataAvailable() {
+        try {
+            // 检查实时统计是否有数据
+            if (realTimeStats.getTotalRequests().get() > 0 || 
+                realTimeStats.getActiveConnections().get() > 0) {
+                return true;
+            }
+            
+            // 检查是否有历史数据
+            if (!minuteWindows.isEmpty() || !applicationStats.isEmpty()) {
+                return true;
+            }
+            
+            return false;
+        } catch (Exception e) {
+            log.error("Error checking data availability: {}", e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    /**
+     * 获取数据源状态
+     */
+    public Map<String, Object> getDataSourceStatus() {
+        Map<String, Object> status = new HashMap<>();
+        
+        try {
+            status.put("serviceAvailable", true);
+            status.put("hasRealTimeData", realTimeStats.getTotalRequests().get() > 0);
+            status.put("minuteWindows", minuteWindows.size());
+            status.put("hourWindows", hourWindows.size());
+            status.put("dayWindows", dayWindows.size());
+            status.put("applicationCount", applicationStats.size());
+            status.put("eventLoopCount", eventLoopStats.size());
+            status.put("lastUpdateTime", LocalDateTime.now());
+            
+            // 检查数据一致性
+            boolean dataConsistent = realTimeStats.isDataConsistent();
+            status.put("dataConsistent", dataConsistent);
+            
+            if (!dataConsistent) {
+                status.put("warning", "Data consistency check failed");
+            }
+            
+        } catch (Exception e) {
+            status.put("serviceAvailable", false);
+            status.put("error", e.getMessage());
+            log.error("Error getting data source status: {}", e.getMessage(), e);
+        }
+        
+        return status;
+    }
+
+    /**
      * 获取实时统计
      */
     public TimeWindowStats.StatsSummary getRealTimeStats() {
         realTimeStats.calculateThroughputMetrics();
+        
+        // 验证数据一致性
+        if (!realTimeStats.isDataConsistent()) {
+            log.warn("Real-time statistics data consistency check failed");
+        }
+        
         return realTimeStats.getSummary();
     }
 

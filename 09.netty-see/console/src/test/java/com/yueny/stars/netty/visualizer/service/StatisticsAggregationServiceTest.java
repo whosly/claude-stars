@@ -226,4 +226,4 @@ class StatisticsAggregationServiceTest {
         
         return channelInfo;
     }
-}"
+}

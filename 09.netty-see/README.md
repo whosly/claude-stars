@@ -2,6 +2,8 @@
 
 一个专为 Netty 应用设计的实时监控系统，提供 Channel 连接监控、性能分析和可视化展示功能。
 
+> netty 版本 4.1.94.Final
+
 ## 🚀 核心特性
 
 - **智能注解系统**：通过 `@NettyMonitor` 注解即可启用监控
@@ -323,6 +325,7 @@ System.out.println("模板有效: " + result.isValid());
 - [功能缺失分析](../dream/docs/specs/netty-see/07-missing-features-analysis.md) - 功能缺失深度分析
 - [开发路线图](../dream/docs/specs/netty-see/08-development-roadmap.md) - 开发计划和里程碑
 - [文档更新日志](../dream/docs/specs/netty-see/CHANGELOG.md) - 文档版本更新记录
+ 
 
 ## 🤝 贡献
 

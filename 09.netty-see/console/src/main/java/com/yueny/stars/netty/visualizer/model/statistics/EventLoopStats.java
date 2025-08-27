@@ -429,6 +429,8 @@ public class EventLoopStats {
     
     @Data
     @lombok.Builder
+    @lombok.AllArgsConstructor
+    @lombok.NoArgsConstructor
     public static class EventLoopStatsSummary {
         private String eventLoopName;
         private String eventLoopType;

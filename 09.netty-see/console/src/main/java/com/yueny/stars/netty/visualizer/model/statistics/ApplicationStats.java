@@ -370,6 +370,8 @@ public class ApplicationStats {
     
     @Data
     @lombok.Builder
+    @lombok.AllArgsConstructor
+    @lombok.NoArgsConstructor
     public static class ApplicationStatsSummary {
         private String applicationName;
         private LocalDateTime firstSeen;

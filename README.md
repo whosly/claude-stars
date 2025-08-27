@@ -5,6 +5,7 @@
 ```
 JDK 1.8+ (推荐 azul-1.8.0_442 或更高版本)
 Maven 3.3.9 或更高版本
+netty 4.1.94.Final
 ```
 
 ## About Netty
@@ -303,4 +304,4 @@ mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.channel.datagram.pointtopo
 
 - [Netty 官方文档](https://netty.io/wiki/)
 - [Java NIO 教程](https://docs.oracle.com/javase/tutorial/essential/io/nio.html)
-- [项目 Issues](https://github.com/your-repo/issues) - 问题反馈和讨论
+- [项目 Issues](https://gitee.com/whosly/netty-stars/issues) - 问题反馈和讨论

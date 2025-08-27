@@ -71,13 +71,13 @@ public class MonitorAgent {
      */
     public static ChannelHandler getMonitorHandler() {
         if (instance == null) {
-            logger.info("MonitorAgent: Instance is null, returning NoOpHandler");
+            logger.trace("MonitorAgent: Instance is null, returning NoOpHandler");
             return new NoOpHandler();
         }
         
         // 即使还没有连接，也返回真正的MonitorHandler
         // 这样可以确保Channel事件被捕获，即使监控数据暂时无法发送
-        logger.info("MonitorAgent: Returning MonitorHandler (connected:  %s)", instance.connected);
+        logger.trace("MonitorAgent: Returning MonitorHandler (connected:  %s)", instance.connected);
         return new MonitorHandler(instance);
     }
     
@@ -113,7 +113,7 @@ public class MonitorAgent {
                 if (channelFuture.isSuccess()) {
                     clientChannel = channelFuture.channel();
                     connected = true;
-                    logger.info("Successfully connected to monitor server at %s:%d", host, port);
+                    logger.trace("Successfully connected to monitor server at %s:%d", host, port);
                     
                     // 发送应用注册消息
                     sendApplicationInfo();
@@ -185,9 +185,9 @@ public class MonitorAgent {
                     .put("timestamp", System.currentTimeMillis())
                     .build();
 
-            logger.debug("MonitorAgent: Sending JSON(substring 20): %s...", json.substring(0, Math.min(20, json.length())));
+            logger.trace("MonitorAgent: Sending JSON(substring 20): %s...", json.substring(0, Math.min(20, json.length())));
             clientChannel.writeAndFlush(json);
-            logger.debug("Sent channel info: %s for channel %s", eventType, channelInfo.getChannelId());
+            logger.trace("Sent channel info: %s for channel %s", eventType, channelInfo.getChannelId());
         } catch (Exception e) {
             logger.warn("Failed to send channel info: %s", e.getMessage());
         }
@@ -231,7 +231,7 @@ public class MonitorAgent {
         
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            logger.info("Monitor client connected to server at %s:%s", host, port);
+            logger.trace("Monitor client connected to server at %s:%s", host, port);
             connected = true;
         }
         

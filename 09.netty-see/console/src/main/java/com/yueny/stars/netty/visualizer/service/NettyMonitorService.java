@@ -679,7 +679,70 @@ public class NettyMonitorService {
             monitoredChannels.remove(channel);
         }
         channelStats.remove(channelId);
+        bufferStats.remove(channelId);
         log.info("Channel unregistered from monitoring: {}", channelId);
+    }
+    
+    /**
+     * 强制清理所有已关闭的Channel
+     */
+    public int forceCleanupClosedChannels() {
+        LocalDateTime now = LocalDateTime.now();
+        List<String> channelsToRemove = new ArrayList<>();
+        
+        for (Map.Entry<String, ChannelInfo> entry : channelStats.entrySet()) {
+            ChannelInfo info = entry.getValue();
+            String channelId = entry.getKey();
+            
+            // 检查实际Channel状态
+            Channel actualChannel = findChannelById(channelId);
+            boolean shouldRemove = false;
+            String reason = "";
+            
+            if (actualChannel != null) {
+                // 有实际Channel对象，检查其状态
+                if (!actualChannel.isOpen() || !actualChannel.isActive()) {
+                    shouldRemove = true;
+                    reason = "actual channel closed";
+                }
+            } else {
+                // 没有实际Channel对象，检查info状态
+                if ("CLOSED".equals(info.getState()) || !info.isActive() || !info.isOpen()) {
+                    shouldRemove = true;
+                    reason = "channel info indicates closed";
+                }
+                // 或者长时间没有活动
+                else if (info.getLastActiveTime() != null && 
+                         info.getLastActiveTime().isBefore(now.minusMinutes(1))) {
+                    shouldRemove = true;
+                    reason = "long inactive";
+                }
+            }
+            
+            if (shouldRemove) {
+                channelsToRemove.add(channelId);
+                log.info("Force cleanup channel: {} from {} - reason: {}", 
+                        channelId, info.getApplicationName(), reason);
+            }
+        }
+        
+        // 执行清理
+        for (String channelId : channelsToRemove) {
+            ChannelInfo info = channelStats.remove(channelId);
+            bufferStats.remove(channelId);
+            
+            // 从实际Channel组中移除
+            Channel actualChannel = findChannelById(channelId);
+            if (actualChannel != null) {
+                monitoredChannels.remove(actualChannel);
+            }
+            
+            System.out.println("🧹 Force cleaned channel: " + channelId + " from " + 
+                    (info != null ? info.getApplicationName() : "Unknown"));
+        }
+        
+        log.info("Force cleanup completed, removed {} channels", channelsToRemove.size());
+        return channelsToRemove.size();
     }
     
     /**
@@ -691,18 +754,39 @@ public class NettyMonitorService {
         
         for (Map.Entry<String, ChannelInfo> entry : channelStats.entrySet()) {
             ChannelInfo info = entry.getValue();
+            String channelId = entry.getKey();
             
-            // 如果Channel已经标记为CLOSED超过30秒，或者超过2分钟没有活动，则认为已过期
-            boolean isClosed = "CLOSED".equals(info.getState()) && 
+            // 检查实际的Channel对象状态
+            Channel actualChannel = findChannelById(channelId);
+            boolean actualChannelClosed = actualChannel != null && (!actualChannel.isOpen() || !actualChannel.isActive());
+            
+            // 多种清理条件：
+            // 1. Channel已经标记为CLOSED超过10秒
+            boolean isMarkedClosed = "CLOSED".equals(info.getState()) && 
                     info.getLastActiveTime() != null && 
-                    info.getLastActiveTime().isBefore(now.minusSeconds(30));
+                    info.getLastActiveTime().isBefore(now.minusSeconds(10));
             
-            boolean isInactive = info.getLastActiveTime() != null && 
-                    info.getLastActiveTime().isBefore(now.minusMinutes(2)) &&
+            // 2. Channel不活跃且超过1分钟没有活动
+            boolean isLongInactive = info.getLastActiveTime() != null && 
+                    info.getLastActiveTime().isBefore(now.minusMinutes(1)) &&
                     !info.isActive();
             
-            if (isClosed || isInactive) {
-                expiredChannels.add(entry.getKey());
+            // 3. 实际Channel对象已关闭超过5秒
+            boolean actualChannelExpired = actualChannelClosed && 
+                    info.getLastActiveTime() != null && 
+                    info.getLastActiveTime().isBefore(now.minusSeconds(5));
+            
+            // 4. Channel信息过旧（超过5分钟没有更新）
+            boolean isStale = info.getLastActiveTime() != null && 
+                    info.getLastActiveTime().isBefore(now.minusMinutes(5));
+            
+            // 5. Channel状态不一致（info显示活跃但实际已关闭）
+            boolean inconsistentState = info.isActive() && actualChannelClosed;
+            
+            if (isMarkedClosed || isLongInactive || actualChannelExpired || isStale || inconsistentState) {
+                expiredChannels.add(channelId);
+                log.debug("Channel {} marked for cleanup - markedClosed: {}, longInactive: {}, actualExpired: {}, stale: {}, inconsistent: {}", 
+                        channelId, isMarkedClosed, isLongInactive, actualChannelExpired, isStale, inconsistentState);
             }
         }
         
@@ -710,11 +794,18 @@ public class NettyMonitorService {
         if (!expiredChannels.isEmpty()) {
             for (String channelId : expiredChannels) {
                 ChannelInfo info = channelStats.remove(channelId);
-                log.info("Removed expired channel: {} from {} (state: {}, lastActive: {})", 
+                // 同时清理缓冲区信息
+                bufferStats.remove(channelId);
+                
+                log.info("🗑️ Removed expired channel: {} from {} (state: {}, active: {}, lastActive: {})", 
                         channelId, 
                         info.getApplicationName(), 
-                        info.getState(), 
+                        info.getState(),
+                        info.isActive(),
                         info.getLastActiveTime());
+                
+                System.out.println("🗑️ Cleaned up channel: " + channelId + " from " + info.getApplicationName() + 
+                        " (Remaining: " + channelStats.size() + ")");
             }
         }
     }
@@ -769,9 +860,9 @@ public class NettyMonitorService {
      */
     @PostConstruct
     public void init() {
-        // 每分钟执行一次清理任务
-        cleanupExecutor.scheduleAtFixedRate(this::cleanupExpiredChannels, 1, 1, TimeUnit.MINUTES);
-        log.info("Channel cleanup task started");
+        // 每30秒执行一次清理任务，更及时地清理已关闭的Channel
+        cleanupExecutor.scheduleAtFixedRate(this::cleanupExpiredChannels, 10, 30, TimeUnit.SECONDS);
+        log.info("Channel cleanup task started (every 30 seconds)");
     }
     
     /**

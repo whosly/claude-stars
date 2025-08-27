@@ -1,6 +1,7 @@
 package com.yueny.stars.netty.visualizer.model.statistics;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -10,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * 
  * @author fengyang
  */
+@Slf4j
 @Data
 public class TimeWindowStats {
     
@@ -127,10 +129,22 @@ public class TimeWindowStats {
      * 记录请求
      */
     public void recordRequest(double responseTimeMs) {
-        totalRequests.incrementAndGet();
+        long requestCount = totalRequests.incrementAndGet();
         
         // 更新响应时间统计
         updateResponseTimeStats(responseTimeMs);
+        
+        // 记录日志用于调试
+        if (requestCount % 100 == 0) {
+            log.debug("Recorded {} requests in window {}-{}", requestCount, windowStart, windowEnd);
+        }
+    }
+    
+    /**
+     * 记录请求（不包含响应时间）
+     */
+    public void recordRequest() {
+        totalRequests.incrementAndGet();
     }
     
     /**
@@ -174,7 +188,9 @@ public class TimeWindowStats {
         long requests = totalRequests.get();
         if (requests > 0) {
             double rate = (double) totalErrors.get() / requests * 100;
-            errorRate.set(rate);
+            errorRate.set(Math.min(100.0, Math.max(0.0, rate))); // 确保错误率在0-100%之间
+        } else {
+            errorRate.set(0.0);
         }
     }
     
@@ -210,17 +226,61 @@ public class TimeWindowStats {
         if (windowDurationSeconds > 0) {
             // 计算TPS (基于成功请求)
             double tpsValue = (double) successfulRequests.get() / windowDurationSeconds;
-            tps.set(tpsValue);
+            tps.set(Math.max(0.0, tpsValue)); // 确保TPS不为负数
             
             // 计算QPS (基于总请求)
             double qpsValue = (double) totalRequests.get() / windowDurationSeconds;
-            qps.set(qpsValue);
+            qps.set(Math.max(0.0, qpsValue)); // 确保QPS不为负数
             
             // 计算字节传输速率
             long totalBytes = totalBytesRead.get() + totalBytesWritten.get();
             double bytesPerSec = (double) totalBytes / windowDurationSeconds;
-            bytesPerSecond.set(bytesPerSec);
+            bytesPerSecond.set(Math.max(0.0, bytesPerSec)); // 确保字节速率不为负数
+        } else {
+            // 如果时间窗口为0，设置所有吞吐量指标为0
+            tps.set(0.0);
+            qps.set(0.0);
+            bytesPerSecond.set(0.0);
         }
+    }
+    
+    /**
+     * 检查数据一致性
+     */
+    public boolean isDataConsistent() {
+        // 检查基本数据有效性
+        if (totalRequests.get() < 0 || successfulRequests.get() < 0 || totalErrors.get() < 0) {
+            return false;
+        }
+        
+        // 检查成功请求数不能超过总请求数
+        if (successfulRequests.get() > totalRequests.get()) {
+            return false;
+        }
+        
+        // 检查错误数不能超过总请求数
+        if (totalErrors.get() > totalRequests.get()) {
+            return false;
+        }
+        
+        // 检查成功请求数 + 错误数应该等于总请求数（允许一定误差）
+        long expectedTotal = successfulRequests.get() + totalErrors.get();
+        if (Math.abs(expectedTotal - totalRequests.get()) > 1) {
+            return false;
+        }
+        
+        // 检查错误率是否在合理范围内
+        double currentErrorRate = errorRate.get();
+        if (currentErrorRate < 0 || currentErrorRate > 100) {
+            return false;
+        }
+        
+        // 检查连接数的逻辑性
+        if (activeConnections.get() < 0 || peakConnections.get() < activeConnections.get()) {
+            return false;
+        }
+        
+        return true;
     }
     
     /**
@@ -309,6 +369,8 @@ public class TimeWindowStats {
     
     @Data
     @lombok.Builder
+    @lombok.AllArgsConstructor
+    @lombok.NoArgsConstructor
     public static class StatsSummary {
         private LocalDateTime windowStart;
         private LocalDateTime windowEnd;

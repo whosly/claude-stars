@@ -140,8 +140,38 @@ public class NettyVisualizerController {
      * 移除Channel监控
      */
     @DeleteMapping("/channels/{channelId}")
-    public void removeChannel(@PathVariable String channelId) {
-        monitorService.unregisterChannel(channelId);
+    public Map<String, Object> removeChannel(@PathVariable String channelId) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            monitorService.unregisterChannel(channelId);
+            result.put("success", true);
+            result.put("message", "Channel removed successfully: " + channelId);
+        } catch (Exception e) {
+            log.error("Failed to remove channel: {}", channelId, e);
+            result.put("success", false);
+            result.put("message", "Failed to remove channel: " + e.getMessage());
+        }
+        return result;
+    }
+    
+    /**
+     * 清理所有已关闭的Channel
+     */
+    @PostMapping("/channels/cleanup")
+    public Map<String, Object> cleanupClosedChannels() {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            int cleanedCount = monitorService.forceCleanupClosedChannels();
+            result.put("success", true);
+            result.put("message", "Cleanup completed");
+            result.put("cleanedChannels", cleanedCount);
+        } catch (Exception e) {
+            log.error("Failed to cleanup channels", e);
+            result.put("success", false);
+            result.put("message", "Failed to cleanup channels: " + e.getMessage());
+            result.put("cleanedChannels", 0);
+        }
+        return result;
     }
     
 

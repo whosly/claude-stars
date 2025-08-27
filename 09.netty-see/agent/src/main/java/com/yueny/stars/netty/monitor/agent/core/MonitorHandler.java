@@ -28,21 +28,21 @@ public class MonitorHandler extends ChannelInboundHandlerAdapter {
         
         try {
             ChannelInfo channelInfo = createChannelInfo(ctx);
-            logger.info("MonitorHandler: Channel active - %s", ctx.channel().id().asShortText());
+            logger.trace("MonitorHandler: Channel active - %s", ctx.channel().id().asShortText());
             
             // 如果监控代理已连接，立即发送；否则缓存事件
             if (agent != null && agent.isConnected()) {
                 agent.sendChannelInfo(channelInfo, "CHANNEL_ACTIVE");
-                logger.info("MonitorHandler: Sent channel active immediately for %s" + channelInfo.getChannelId());
+                logger.trace("MonitorHandler: Sent channel active immediately for %s" + channelInfo.getChannelId());
             } else {
                 // 缓存事件，等待连接建立后发送
                 pendingEvents.add(() -> {
                     if (agent != null) {
                         agent.sendChannelInfo(channelInfo, "CHANNEL_ACTIVE");
-                        logger.info("MonitorHandler: Sent cached CHANNEL_ACTIVE for %s", channelInfo.getChannelId());
+                        logger.trace("MonitorHandler: Sent cached CHANNEL_ACTIVE for %s", channelInfo.getChannelId());
                     }
                 });
-                logger.info("MonitorHandler: Cached CHANNEL_ACTIVE event (agent not connected yet)");
+                logger.trace("MonitorHandler: Cached CHANNEL_ACTIVE event (agent not connected yet)");
                 
                 // 启动一个任务定期检查连接状态并发送缓存的事件
                 scheduleEventFlush();
@@ -64,7 +64,7 @@ public class MonitorHandler extends ChannelInboundHandlerAdapter {
         // 使用EventLoop来调度任务
         ctx.channel().eventLoop().schedule(() -> {
             if (agent != null && agent.isConnected() && !pendingEvents.isEmpty()) {
-                logger.info("MonitorHandler: Flushing %s cached events", pendingEvents.size());
+                logger.trace("MonitorHandler: Flushing %s cached events", pendingEvents.size());
                 for (Runnable event : pendingEvents) {
                     try {
                         event.run();
@@ -85,7 +85,7 @@ public class MonitorHandler extends ChannelInboundHandlerAdapter {
         try {
             ChannelInfo channelInfo = createChannelInfo(ctx);
             agent.sendChannelInfo(channelInfo, "CHANNEL_INACTIVE");
-            logger.debug("Channel inactive: %s", ctx.channel().id().asShortText());
+            logger.trace("Channel inactive: %s", ctx.channel().id().asShortText());
         } catch (Exception e) {
             logger.warn("Failed to send channel inactive info: %s", e.getMessage());
         }
@@ -248,7 +248,7 @@ public class MonitorHandler extends ChannelInboundHandlerAdapter {
             Object usernameAttr = ctx.channel().attr(io.netty.util.AttributeKey.valueOf("username")).get();
             if (usernameAttr != null) {
                 info.setUsername(usernameAttr.toString());
-                logger.debug("Found username in channel attributes: %s", usernameAttr);
+                logger.trace("Found username in channel attributes: %s", usernameAttr);
             }
         } catch (Exception e) {
             logger.debug("No username attribute found in channel: %s", e.getMessage());
@@ -259,7 +259,7 @@ public class MonitorHandler extends ChannelInboundHandlerAdapter {
         // 如果localAddress包含服务器端口，说明这是服务器端channel
         String role = determineChannelRole(info.getLocalAddress(), info.getRemoteAddress());
         info.setChannelRole(role);
-        logger.debug("Channel role determined: %s for %s", role, info.getChannelId());
+        logger.trace("Channel role determined: %s for %s", role, info.getChannelId());
         
         return info;
     }
