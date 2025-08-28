@@ -40,6 +40,8 @@
 		<module>05.chats</module>
 		<module>06.netty-buffer</module>
 		<module>07.netty-channel</module>
+		<!-- 使用比较优秀的编码解码技术MessagePack，高效编解码 -->
+		<module>08.msgpack</module>
 		<!-- Netty 可视化项目 -->
 		<module>09.netty-see</module>
 		<!-- Netty 内存分配器类 -->

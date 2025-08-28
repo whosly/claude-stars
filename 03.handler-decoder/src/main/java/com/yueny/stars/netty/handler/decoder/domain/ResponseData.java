@@ -1,19 +1,16 @@
-package com.yueny.stars.netty.handler.decoder;
+package com.yueny.stars.netty.handler.decoder.domain;
 
 import lombok.Builder;
 import lombok.Data;
 
 /**
  * @author fengyang
- * @date 2025-08-18 09:44:10
+ * @date 2025-08-18 09:46:49
  * @description
  */
 @Data
 @Builder
-public class RequestData {
-    private int intValue;
+public class ResponseData {
 
     private String stringValue;
-
-
 }

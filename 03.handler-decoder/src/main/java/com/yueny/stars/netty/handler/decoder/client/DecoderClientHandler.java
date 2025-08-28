@@ -1,6 +1,6 @@
 package com.yueny.stars.netty.handler.decoder.client;
 
-import com.yueny.stars.netty.handler.decoder.RequestData;
+import com.yueny.stars.netty.handler.decoder.domain.RequestData;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

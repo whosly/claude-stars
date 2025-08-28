@@ -1,6 +1,6 @@
-package com.yueny.stars.netty.handler.decoder.client;
+package com.yueny.stars.netty.handler.decoder.client.code;
 
-import com.yueny.stars.netty.handler.decoder.RequestData;
+import com.yueny.stars.netty.handler.decoder.domain.RequestData;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
  * @date 2025-08-18 10:07:40
  * @description
  */
-public class RequestClientDataEncoder extends MessageToByteEncoder<RequestData> {
+public class ClientRequestDataEncoder extends MessageToByteEncoder<RequestData> {
 
     public final static Charset CHARSET = Charset.forName("UTF-8");
 

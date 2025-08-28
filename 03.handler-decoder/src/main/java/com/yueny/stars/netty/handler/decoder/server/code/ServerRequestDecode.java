@@ -1,6 +1,6 @@
-package com.yueny.stars.netty.handler.decoder.server;
+package com.yueny.stars.netty.handler.decoder.server.code;
 
-import com.yueny.stars.netty.handler.decoder.RequestData;
+import com.yueny.stars.netty.handler.decoder.domain.RequestData;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
@@ -13,7 +13,7 @@ import java.util.List;
  * @date 2025-08-18 09:58:28
  * @description
  */
-public class RequestDecoder extends ReplayingDecoder<RequestData> {
+public class ServerRequestDecode extends ReplayingDecoder<RequestData> {
 
     public final static Charset CHARSET = Charset.forName("UTF-8");
 

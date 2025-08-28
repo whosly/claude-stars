@@ -1,5 +1,7 @@
 package com.yueny.stars.netty.handler.decoder.server;
 
+import com.yueny.stars.netty.handler.decoder.server.code.ServerRequestDecode;
+import com.yueny.stars.netty.handler.decoder.server.code.ServerResponseDataEncode;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -29,9 +31,9 @@ public class DecoderServer {
                         public void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
                             pipeline.addLast(
-                                    new RequestDecoder(),
-                                    new ResponseDataEncoder(),
-                                    new SimpleProcessingHandler());
+                                    new ServerRequestDecode(),
+                                    new ServerResponseDataEncode(),
+                                    new DecoderServerHandler());
                         }
                     })
                     //设置队列大小

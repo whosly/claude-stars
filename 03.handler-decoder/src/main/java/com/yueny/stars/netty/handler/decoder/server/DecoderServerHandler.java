@@ -1,7 +1,7 @@
 package com.yueny.stars.netty.handler.decoder.server;
 
-import com.yueny.stars.netty.handler.decoder.RequestData;
-import com.yueny.stars.netty.handler.decoder.ResponseData;
+import com.yueny.stars.netty.handler.decoder.domain.RequestData;
+import com.yueny.stars.netty.handler.decoder.domain.ResponseData;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,7 +12,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  * @date 2025-08-18 09:49:51
  * @description
  */
-public class SimpleProcessingHandler extends ChannelInboundHandlerAdapter {
+public class DecoderServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
         System.out.println("Handler added");

@@ -1,5 +1,7 @@
 package com.yueny.stars.netty.handler.decoder.client;
 
+import com.yueny.stars.netty.handler.decoder.client.code.ClientRequestDataEncoder;
+import com.yueny.stars.netty.handler.decoder.client.code.ClientResponseDataDecoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -31,8 +33,8 @@ public class DecoderClient {
                         public void initChannel(SocketChannel ch)
                                 throws Exception {
                             ch.pipeline().addLast(
-                                    new RequestClientDataEncoder(),
-                                    new ResponseClientDataDecoder(),
+                                    new ClientRequestDataEncoder(),
+                                    new ClientResponseDataDecoder(),
                                     new DecoderClientHandler());
                         }
                     });
