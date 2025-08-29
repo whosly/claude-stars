@@ -1,7 +1,7 @@
 package com.yueny.stars.netty.msgpack.client;
 
-import com.yueny.stars.netty.msgpack.code.MsgPackDecoder;
-import com.yueny.stars.netty.msgpack.code.MsgPackEncoder;
+import com.yueny.stars.netty.msgpack.code.MsgPack6Decoder;
+import com.yueny.stars.netty.msgpack.code.MsgPack6Encoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -18,7 +18,7 @@ import io.netty.handler.codec.LengthFieldPrepender;
  * @date 2025-08-28 10:56:19
  * @description
  */
-public class Clinet {
+public class ClientV6 {
     public static void main(String[] args) {
         EventLoopGroup group = new NioEventLoopGroup();
 
@@ -31,9 +31,9 @@ public class Clinet {
                         public void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast(
                                     new LengthFieldBasedFrameDecoder(65535,0,2,0,2));
-                            ch.pipeline().addLast(new MsgPackDecoder());
+                            ch.pipeline().addLast(new MsgPack6Decoder());
                             ch.pipeline().addLast(new LengthFieldPrepender(2));
-                            ch.pipeline().addLast(new MsgPackEncoder());
+                            ch.pipeline().addLast(new MsgPack6Encoder());
                             ch.pipeline().addLast(new ClientHandler());
                         }
                     });

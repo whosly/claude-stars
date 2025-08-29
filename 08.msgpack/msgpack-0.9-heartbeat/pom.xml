@@ -9,9 +9,9 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>msgpack-0.9</artifactId>
-	<name>msgpack-0.9</name>
-	<description>使用比较优秀的编码解码技术MessagePack，高效编解码</description>
+	<artifactId>msgpack-0.9-heartbeat</artifactId>
+	<name>msgpack-0.9-heartbeat</name>
+	<description>带心跳检测的通信交互，编码解码技术MessagePack</description>
 
 	<dependencies>
 		<dependency>

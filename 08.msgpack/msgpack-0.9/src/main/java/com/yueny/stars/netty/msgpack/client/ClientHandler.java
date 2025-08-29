@@ -1,14 +1,13 @@
 package com.yueny.stars.netty.msgpack.client;
 
 import com.yueny.stars.netty.msgpack.domain.HeartbeatData;
-import com.yueny.stars.netty.msgpack.domain.HeartbeatDataV6;
 import com.yueny.stars.netty.msgpack.domain.TypeData;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
  * @author fengyang
- * @date 2025-08-28 10:57:02
+ * @date 2025-08-28 14:12:34
  * @description
  */
 class ClientHandler extends ChannelInboundHandlerAdapter {
@@ -20,11 +19,11 @@ class ClientHandler extends ChannelInboundHandlerAdapter {
         // client 发送的数据对象
         for (int i = 1; i <= 10; i++) {
             try {
-                HeartbeatDataV6 msg = new HeartbeatDataV6(HeartbeatData.builder()
+                HeartbeatData msg = HeartbeatData.builder()
                         .type(TypeData.PING)
                         .seatId(TypeData.PING_SEAT)
                         .memo("jack a dull boy" + i)
-                        .build());
+                        .build();
 
                 ctx.writeAndFlush(msg);
             } catch (Exception e) {
@@ -37,11 +36,5 @@ class ClientHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg)
             throws Exception {
         System.out.println("Client received: " + msg);
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
-        ctx.close();
     }
 }

@@ -9,33 +9,10 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>msgpack-0.6</artifactId>
-	<name>msgpack-0.6</name>
-	<description>使用比较优秀的编码解码技术MessagePack，高效编解码</description>
+	<artifactId>msgpack-common</artifactId>
+	<name>msgpack-common， msgpack 工程中的公共对象的定义</name>
 
 	<dependencies>
-		<dependency>
-			<groupId>com.yueny.study</groupId>
-			<artifactId>core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.yueny.study</groupId>
-			<artifactId>msgpack-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-all</artifactId>
-		</dependency>
-
-		<!-- 编码解码技术MessagePack -->
-		<dependency>
-			<groupId>org.msgpack</groupId>
-			<artifactId>msgpack</artifactId>
-			<version>0.6.12</version>
-		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

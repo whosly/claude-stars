@@ -1,7 +1,7 @@
 package com.yueny.stars.netty.msgpack.server;
 
-import com.yueny.stars.netty.msgpack.code.MsgPackDecoder;
-import com.yueny.stars.netty.msgpack.code.MsgPackEncoder;
+import com.yueny.stars.netty.msgpack.code.MsgPack6Decoder;
+import com.yueny.stars.netty.msgpack.code.MsgPack6Encoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -18,7 +18,7 @@ import io.netty.handler.codec.LengthFieldPrepender;
  * @date 2025-08-28 10:52:27
  * @description
  */
-public class Server {
+public class ServerV6 {
 
     public static void main(String[] args) throws InterruptedException {
         EventLoopGroup boss = new NioEventLoopGroup();
@@ -40,12 +40,12 @@ public class Server {
                              * 参数（5）initialBytesToStrip：获取完一个完整的数据包之后，忽略前面的指定的位数个字节。
                              */
                             ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(65535,0,2,0,2));
-                            ch.pipeline().addLast(new MsgPackDecoder());
+                            ch.pipeline().addLast(new MsgPack6Decoder());
                             /**
                              * 客户端使用 LengthFieldPrepender 给数据添加报文头Length字段，接受方使用 LengthFieldBasedFrameDecoder 进行解码
                              */
                             ch.pipeline().addLast(new LengthFieldPrepender(2));
-                            ch.pipeline().addLast(new MsgPackEncoder());
+                            ch.pipeline().addLast(new MsgPack6Encoder());
                             /**
                              * 处理客户端的各种事件
                              */

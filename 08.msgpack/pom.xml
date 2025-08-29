@@ -11,12 +11,14 @@
 
 	<artifactId>msgpack</artifactId>
 	<packaging>pom</packaging>
-	<name>08.msgpack</name>
-	<description>使用比较优秀的编码解码技术MessagePack，高效编解码</description>
+	<name>msgpack</name>
+	<description>使用编码解码技术MessagePack</description>
 
 	<modules>
+		<module>common</module>
 		<module>msgpack-0.6</module>
 		<module>msgpack-0.9</module>
+		<module>msgpack-0.9-heartbeat</module>
 	</modules>
 
 </project>

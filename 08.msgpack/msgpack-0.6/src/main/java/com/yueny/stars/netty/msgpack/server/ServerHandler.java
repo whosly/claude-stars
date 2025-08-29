@@ -1,6 +1,6 @@
 package com.yueny.stars.netty.msgpack.server;
 
-import com.yueny.stars.netty.msgpack.domain.Student6Info;
+import com.yueny.stars.netty.msgpack.domain.HeartbeatDataV6;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -9,7 +9,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * @date 2025-08-28 10:54:26
  * @description
  */
-public class ServerHandler extends SimpleChannelInboundHandler<Student6Info> {
+class ServerHandler extends SimpleChannelInboundHandler<HeartbeatDataV6> {
     private int counter=0;
 
     @Override
@@ -19,8 +19,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<Student6Info> {
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, Student6Info msg) {
-        System.out.println("channelRead - StudentInfo：" + msg + "， counter:"+ ++counter);
+    public void channelRead0(ChannelHandlerContext ctx, HeartbeatDataV6 msg) {
+        System.out.println("channelRead - HeartbeatDataV6：" + msg + "， counter:" + (++counter));
     }
 
     @Override
