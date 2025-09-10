@@ -28,5 +28,4 @@ target
 *.nb-gradle
 package-lock.json
 *.log
-*.gz
 .vscode
