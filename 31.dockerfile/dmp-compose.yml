@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: pg-dmp
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Aa123456.
+      POSTGRES_DB: dmp
+    ports:
+      - "5432:5432"
+#    volumes:
+#      - ./init:/docker-entrypoint-initdb.d  # 自动执行 init.sql
+
+  redis:
+    image: redis:7
+    container_name: redis-dev
+    ports:
+      - "6379:6379"
