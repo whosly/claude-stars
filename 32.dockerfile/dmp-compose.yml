@@ -2,12 +2,12 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:14
-    container_name: pg-dmp
+    image: postgres:16
+    container_name: pg16
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Aa123456.
-      POSTGRES_DB: dmp
+      POSTGRES_DB: whosly
     ports:
       - "5432:5432"
 #    volumes:

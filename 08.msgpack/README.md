@@ -8,13 +8,13 @@
   - `HeartbeatData`: 心跳/业务报文的简单数据结构（`type`, `seatId`, `speed`, `memo`）。
   - `TypeData`: 类型常量定义（`PING`, `PONG`, `CUSTOME` 等）。
 
-- `msgpack-0.6`: 使用 MessagePack 0.6 版本 API 的编解码示例
+- `msgpack-0.6`: 使用 MessagePack 0.6 版本的编解码示例
   - 主要类：`ServerV6`, `ClientV6`, `MsgPack6Encoder`, `MsgPack6Decoder`, 以及对应的 `ServerHandler`/`ClientHandler`。
   - 特点：
     - 使用 `org.msgpack.MessagePack` 的旧 API 进行对象序列化/反序列化。
     - Netty 中通过 `LengthFieldBasedFrameDecoder` + `LengthFieldPrepender(2)` 实现基于长度字段的半包/粘包处理（2 字节长度）。
 
-- `msgpack-0.9`: 使用 MessagePack 0.9 核心 API 的编解码示例
+- `msgpack-0.9`: 使用 MessagePack 0.9 核心的编解码示例
   - 主要类：`ServerV9`, `ClientV9`, `MsgPackEncoder`, `MsgPackDecoder`，以及对应的 `ServerHandler`/`ClientHandler`。
   - 特点：
     - 使用 `org.msgpack.core`：`MessageBufferPacker`/`MessageUnpacker` 进行手动字段级序列化/反序列化。

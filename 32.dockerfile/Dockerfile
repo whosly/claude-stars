@@ -19,9 +19,9 @@ RUN sed -e 's|^mirrorlist=|#mirrorlist=|g' \
 # 设置默认命令
 CMD ["/bin/bash"]
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/apps
 
-COPY . /usr/src/app
+COPY . /usr/src/apps
 RUN mvn package
 
 ENV PORT 5000
