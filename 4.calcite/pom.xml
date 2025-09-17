@@ -1,0 +1,234 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.whosly</groupId>
+		<artifactId>claude-stars-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+    <groupId>com.whosly</groupId>
+	<artifactId>calcite-parent</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>${project.artifactId}</name>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<file.encoding>UTF-8</file.encoding>
+		<project.build.sourceEncoding>${file.encoding}</project.build.sourceEncoding>
+		<skipTest>true</skipTest>
+
+		<!-- JDK 8 -->
+		<!--        <version>2.0.9.RELEASE</version>-->
+		<!--        <version>2.1.18.RELEASE</version>-->
+		<spring-boot.version>3.3.2</spring-boot.version>
+
+        <calcite.version>1.39.0</calcite.version>
+        <!-- Jul 26, 2023 -->
+<!--        <calcite.version>1.35.0</calcite.version>-->
+<!--        <calcite.version>1.36.0</calcite.version>-->
+<!--        <calcite.version>1.38.0</calcite.version>-->
+        <!-- 该版本的 avatica 1.26.0 与 httpclient5、httpcore5、jetty(9.4.56.v20240826) 适配  -->
+        <avatica.version>1.26.0</avatica.version>
+
+        <httpclient5.version>5.4.1</httpclient5.version>
+        <httpcore5.version>5.3.1</httpcore5.version>
+	</properties>
+
+	<modules>
+		<module>41.load-parser-jj</module>
+		<module>42.parser-jj-generator</module>
+		<module>43.parser-generator</module>
+		<module>44.auto-generator</module>
+		<module>45.new-grammar</module>
+		<module>46.calcite-schema</module>
+		<module>47.calcite-rule</module>
+		<module>48.avacita</module>
+	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+            <dependency>
+                <groupId>org.apache.calcite.avatica</groupId>
+                <artifactId>avatica-core</artifactId>
+                <version>${avatica.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.calcite.avatica</groupId>
+                <artifactId>avatica-server</artifactId>
+                <version>${avatica.version}</version>
+            </dependency>
+
+            <!-- https://mvnrepository.com/artifact/org.apache.calcite/calcite-core -->
+            <dependency>
+                <groupId>org.apache.calcite</groupId>
+                <artifactId>calcite-core</artifactId>
+                <version>${calcite.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.calcite</groupId>
+                <artifactId>calcite-server</artifactId>
+                <version>${calcite.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.calcite</groupId>
+                <artifactId>calcite-druid</artifactId>
+                <version>${calcite.version}</version>
+            </dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+                    <groupId>com.googlecode.fmpp-maven-plugin</groupId>
+                    <artifactId>fmpp-maven-plugin</artifactId>
+                    <version>1.0</version>
+                    <configuration>
+                        <cfgFile>src/main/codegen/config.fmpp</cfgFile>
+                        <outputDirectory>${project.build.directory}/generated-sources/fmpp</outputDirectory>
+                        <templateDirectory>src/main/codegen/templates</templateDirectory>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.freemarker</groupId>
+                            <artifactId>freemarker</artifactId>
+                            <version>2.3.28</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>generate-fmpp-sources</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- 使用javacc 扩展进行代码生成 -->
+                <!-- generate the parser (Parser.jj is itself generated wit fmpp above) -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>javacc-maven-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <executions>
+                        <execution>
+                            <id>javacc</id>
+                            <goals>
+                                <goal>javacc</goal>
+                            </goals>
+                            <configuration>
+                                <sourceDirectory>${project.build.directory}/generated-sources/fmpp</sourceDirectory>
+                                <includes>
+                                    <include>**/*.jj</include>
+                                </includes>
+                                <lookAhead>1</lookAhead>
+                                <isStatic>false</isStatic>
+                                <outputDirectory>${project.build.directory}/generated-sources/javacc</outputDirectory>
+                            </configuration>
+                            <phase>generate-sources</phase>
+                        </execution>
+                        <execution>
+                            <id>javacc-test</id>
+                            <phase>generate-test-sources</phase>
+                            <goals>
+                                <goal>javacc</goal>
+                            </goals>
+                            <configuration>
+                                <sourceDirectory>${project.build.directory}/generated-test-sources/fmpp</sourceDirectory>
+                                <outputDirectory>${project.build.directory}/generated-test-sources/javacc</outputDirectory>
+                                <includes>
+                                    <include>**/Parser.jj</include>
+                                </includes>
+                                <lookAhead>2</lookAhead>
+                                <isStatic>false</isStatic>
+                                <ignoreCase>true</ignoreCase>
+                                <unicodeInput>true</unicodeInput>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.7.1</version>
+                    <executions>
+                        <execution>
+                            <id>unpack-parser-template</id>
+                            <phase>initialize</phase>
+                            <goals>
+                                <goal>unpack</goal>
+                            </goals>
+                            <configuration>
+                                <artifactItems>
+                                    <artifactItem>
+                                        <groupId>org.apache.calcite</groupId>
+                                        <artifactId>calcite-core</artifactId>
+                                        <version>${calcite.version}</version>
+                                        <type>jar</type>
+                                        <overWrite>true</overWrite>
+                                        <outputDirectory>${project.build.directory}/</outputDirectory>
+                                        <includes>**/Parser.jj</includes>
+                                    </artifactItem>
+                                </artifactItems>
+                                <skip>false</skip>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.drill.tools</groupId>
+                    <artifactId>drill-fmpp-maven-plugin</artifactId>
+                    <version>1.21.2</version>
+                    <executions>
+                        <execution>
+                            <configuration>
+                                <config>src/main/codegen/config.fmpp</config>
+                                <output>${project.build.directory}/generated-sources/fmpp</output>
+                                <templates>src/main/codegen/templates</templates>
+                            </configuration>
+                            <id>generate-fmpp-sources</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+
+</project>

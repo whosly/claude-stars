@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.whosly</groupId>
+		<artifactId>claude-stars-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+    <groupId>com.whosly</groupId>
+	<artifactId>netty-parent</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>${project.artifactId}</name>
+
+	<properties>
+		<java.version>1.8</java.version>
+		<file.encoding>UTF-8</file.encoding>
+		<project.build.sourceEncoding>${file.encoding}</project.build.sourceEncoding>
+		<skipTest>true</skipTest>
+	</properties>
+
+	<modules>
+		<module>01.server-and-client</module>
+		<module>02.server-and-client-application</module>
+		<module>03.handler-decoder</module>
+		<module>04.chat</module>
+		<module>05.chats</module>
+		<module>06.netty-buffer</module>
+		<module>07.netty-channel</module>
+		<!-- 使用比较优秀的编码解码技术MessagePack，高效编解码 -->
+		<module>08.msgpack</module>
+		<!-- Netty 可视化项目 -->
+		<module>09.netty-see</module>
+		<!-- Netty 内存分配器类 -->
+		<module>11.netty-capacity</module>
+		<!-- https://juejin.cn/post/7232905822278729783?from=search-suggest -->
+		<!--		<module>05.web-socket</module>-->
+
+		<module>core</module>
+		<module>utils</module>
+	</modules>
+
+</project>

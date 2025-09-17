@@ -3,15 +3,6 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 	<modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <!-- JDK 8 -->
-        <!--        <version>2.0.9.RELEASE</version>-->
-        <!--        <version>2.1.18.RELEASE</version>-->
-        <version>3.3.2</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
 
     <groupId>com.whosly</groupId>
 	<artifactId>claude-stars-parent</artifactId>
@@ -28,17 +19,6 @@
 		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
 		<commons.collections4.version>4.0</commons.collections4.version>
 
-        <calcite.version>1.39.0</calcite.version>
-        <!-- Jul 26, 2023 -->
-<!--        <calcite.version>1.35.0</calcite.version>-->
-<!--        <calcite.version>1.36.0</calcite.version>-->
-<!--        <calcite.version>1.38.0</calcite.version>-->
-        <!-- 该版本的 avatica 1.26.0 与 httpclient5、httpcore5、jetty(9.4.56.v20240826) 适配  -->
-        <avatica.version>1.26.0</avatica.version>
-
-        <httpclient5.version>5.4.1</httpclient5.version>
-        <httpcore5.version>5.3.1</httpcore5.version>
-
 <!--		<google.guava.version>27.0.1-jre</google.guava.version>-->
 		<google.guava.version>33.3.0-jre</google.guava.version>
 		<hutool.version>5.6.1</hutool.version>
@@ -54,33 +34,9 @@
 	</properties>
 
 	<modules>
-		<module>01.server-and-client</module>
-		<module>02.server-and-client-application</module>
-		<module>03.handler-decoder</module>
-		<module>04.chat</module>
-		<module>05.chats</module>
-		<module>06.netty-buffer</module>
-		<module>07.netty-channel</module>
-		<!-- 使用比较优秀的编码解码技术MessagePack，高效编解码 -->
-		<module>08.msgpack</module>
-		<!-- Netty 可视化项目 -->
-		<module>09.netty-see</module>
-		<!-- Netty 内存分配器类 -->
-		<module>11.netty-capacity</module>
-		<!-- https://juejin.cn/post/7232905822278729783?from=search-suggest -->
-		<!--		<module>05.web-socket</module>-->
-
-		<module>41.load-parser-jj</module>
-		<module>42.parser-jj-generator</module>
-		<module>43.parser-generator</module>
-		<module>44.auto-generator</module>
-		<module>45.new-grammar</module>
-		<module>46.calcite-schema</module>
-		<module>47.calcite-rule</module>
-		<module>48.avacita</module>
-
-		<module>core</module>
-		<module>utils</module>
+		<module>1.netty</module>
+		<module>3.docker</module>
+		<module>4.calcite</module>
 	</modules>
 
 	<dependencyManagement>
@@ -143,49 +99,6 @@
 				<artifactId>hutool-all</artifactId>
 				<version>${hutool.version}</version>
 			</dependency>
-
-
-            <dependency>
-                <groupId>org.apache.calcite.avatica</groupId>
-                <artifactId>avatica-core</artifactId>
-                <version>${avatica.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.calcite.avatica</groupId>
-                <artifactId>avatica-server</artifactId>
-                <version>${avatica.version}</version>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.apache.calcite/calcite-core -->
-            <dependency>
-                <groupId>org.apache.calcite</groupId>
-                <artifactId>calcite-core</artifactId>
-                <version>${calcite.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.calcite</groupId>
-                <artifactId>calcite-server</artifactId>
-                <version>${calcite.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.calcite</groupId>
-                <artifactId>calcite-druid</artifactId>
-                <version>${calcite.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>com.mysql</groupId>
@@ -322,126 +235,6 @@
 					<artifactId>exec-maven-plugin</artifactId>
 					<version>1.2.1</version>
 				</plugin>
-
-				<plugin>
-                    <groupId>com.googlecode.fmpp-maven-plugin</groupId>
-                    <artifactId>fmpp-maven-plugin</artifactId>
-                    <version>1.0</version>
-                    <configuration>
-                        <cfgFile>src/main/codegen/config.fmpp</cfgFile>
-                        <outputDirectory>${project.build.directory}/generated-sources/fmpp</outputDirectory>
-                        <templateDirectory>src/main/codegen/templates</templateDirectory>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.freemarker</groupId>
-                            <artifactId>freemarker</artifactId>
-                            <version>2.3.28</version>
-                        </dependency>
-                    </dependencies>
-                    <executions>
-                        <execution>
-                            <id>generate-fmpp-sources</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>generate</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <!-- 使用javacc 扩展进行代码生成 -->
-                <!-- generate the parser (Parser.jj is itself generated wit fmpp above) -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>javacc-maven-plugin</artifactId>
-                    <version>3.1.0</version>
-                    <executions>
-                        <execution>
-                            <id>javacc</id>
-                            <goals>
-                                <goal>javacc</goal>
-                            </goals>
-                            <configuration>
-                                <sourceDirectory>${project.build.directory}/generated-sources/fmpp</sourceDirectory>
-                                <includes>
-                                    <include>**/*.jj</include>
-                                </includes>
-                                <lookAhead>1</lookAhead>
-                                <isStatic>false</isStatic>
-                                <outputDirectory>${project.build.directory}/generated-sources/javacc</outputDirectory>
-                            </configuration>
-                            <phase>generate-sources</phase>
-                        </execution>
-                        <execution>
-                            <id>javacc-test</id>
-                            <phase>generate-test-sources</phase>
-                            <goals>
-                                <goal>javacc</goal>
-                            </goals>
-                            <configuration>
-                                <sourceDirectory>${project.build.directory}/generated-test-sources/fmpp</sourceDirectory>
-                                <outputDirectory>${project.build.directory}/generated-test-sources/javacc</outputDirectory>
-                                <includes>
-                                    <include>**/Parser.jj</include>
-                                </includes>
-                                <lookAhead>2</lookAhead>
-                                <isStatic>false</isStatic>
-                                <ignoreCase>true</ignoreCase>
-                                <unicodeInput>true</unicodeInput>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.7.1</version>
-                    <executions>
-                        <execution>
-                            <id>unpack-parser-template</id>
-                            <phase>initialize</phase>
-                            <goals>
-                                <goal>unpack</goal>
-                            </goals>
-                            <configuration>
-                                <artifactItems>
-                                    <artifactItem>
-                                        <groupId>org.apache.calcite</groupId>
-                                        <artifactId>calcite-core</artifactId>
-                                        <version>${calcite.version}</version>
-                                        <type>jar</type>
-                                        <overWrite>true</overWrite>
-                                        <outputDirectory>${project.build.directory}/</outputDirectory>
-                                        <includes>**/Parser.jj</includes>
-                                    </artifactItem>
-                                </artifactItems>
-                                <skip>false</skip>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.drill.tools</groupId>
-                    <artifactId>drill-fmpp-maven-plugin</artifactId>
-                    <version>1.21.2</version>
-                    <executions>
-                        <execution>
-                            <configuration>
-                                <config>src/main/codegen/config.fmpp</config>
-                                <output>${project.build.directory}/generated-sources/fmpp</output>
-                                <templates>src/main/codegen/templates</templates>
-                            </configuration>
-                            <id>generate-fmpp-sources</id>
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>generate</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
 			</plugins>
 		</pluginManagement>
 
