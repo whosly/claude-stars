@@ -18,9 +18,6 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<file.encoding>UTF-8</file.encoding>
-		<project.build.sourceEncoding>${file.encoding}</project.build.sourceEncoding>
-		<skipTest>true</skipTest>
 	</properties>
 
 	<modules>
@@ -44,4 +41,12 @@
 		<module>utils</module>
 	</modules>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 </project>
