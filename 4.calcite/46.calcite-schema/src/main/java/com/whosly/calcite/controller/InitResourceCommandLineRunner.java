@@ -1,6 +1,5 @@
 package com.whosly.calcite.controller;
 
-import jakarta.annotation.Resource;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +16,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 @Component

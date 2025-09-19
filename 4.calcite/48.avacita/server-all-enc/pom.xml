@@ -12,4 +12,12 @@
     <artifactId>server-all-enc</artifactId>
     <description>服务端： SQL加解密实现</description>
 
+    <dependencies>
+        <!-- SLF4J API -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>

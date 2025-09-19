@@ -36,6 +36,8 @@
 		<module>1.netty</module>
 		<module>3.docker</module>
 		<module>4.calcite</module>
+		<module>5.springboot2</module>
+		<module>6.springboot3</module>
 	</modules>
 
 	<dependencyManagement>
