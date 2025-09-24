@@ -1,4 +1,4 @@
-package com.whosly.jvm.stat;
+package com.whosly.stars.java.jvm.stat;
 
 import java.lang.management.*;
 import java.text.DecimalFormat;

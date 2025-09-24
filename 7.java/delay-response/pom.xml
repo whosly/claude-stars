@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.whosly</groupId>
-        <artifactId>jvm-parent</artifactId>
+        <artifactId>java-project-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jvm-stat</artifactId>
+    <artifactId>delay-response</artifactId>
 
     <dependencies>
         <dependency>

@@ -38,7 +38,7 @@
 		<module>4.calcite</module>
 		<module>5.springboot2</module>
 		<module>6.springboot3</module>
-		<module>7.jvm</module>
+		<module>7.java</module>
 	</modules>
 
 	<dependencyManagement>
