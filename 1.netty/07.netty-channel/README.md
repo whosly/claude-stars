@@ -112,8 +112,8 @@ ServerSocketChannel 是一个接口，它定义了服务器端用于监听入站
 
 应用场景：所有基于 TCP 协议的服务器端应用，如 HTTP 服务器、WebSocket 服务器等。
 
-比如要实现 `回环 TCP 的跨进程本机通信`的功能，在`com.yueny.stars.netty.channel.serversocket.loopback.TcpLoopbackServer` 中使用 `NioServerSocketChannel` 监听 `127.0.0.1:9000`，
-在 `com.yueny.stars.netty.channel.serversocket.loopback.TcpLoopbackClient` 中 NioSocketChannel 连接 127.0.0.1:9000， 即可实现本机的跨进程通信。
+比如要实现 `回环 TCP 的跨进程本机通信`的功能，在`com.whosly.stars.netty.channel.serversocket.loopback.TcpLoopbackServer` 中使用 `NioServerSocketChannel` 监听 `127.0.0.1:9000`，
+在 `com.whosly.stars.netty.channel.serversocket.loopback.TcpLoopbackClient` 中 NioSocketChannel 连接 127.0.0.1:9000， 即可实现本机的跨进程通信。
 
 
 ### SocketChannel
@@ -136,12 +136,12 @@ SocketChannel 是基于 NIO 的 TCP 客户端 Channel，用于与服务器建立
 **示例代码**
 在这里，除了，还额外实现了心跳机制哦~
 
-> * `com.yueny.stars.netty.channel.socket.SocketTcpClient`
-> * `com.yueny.stars.netty.channel.socket.TcpClientHandler`
-> * `com.yueny.stars.netty.channel.socket.HeartbeatHandler`
-> * `com.yueny.stars.netty.channel.socket.SocketTcpServer`
-> * `com.yueny.stars.netty.channel.socket.TcpServerHandler`
-> * `com.yueny.stars.netty.channel.socket.ServerHeartbeatHandler`
+> * `com.whosly.stars.netty.channel.socket.SocketTcpClient`
+> * `com.whosly.stars.netty.channel.socket.TcpClientHandler`
+> * `com.whosly.stars.netty.channel.socket.HeartbeatHandler`
+> * `com.whosly.stars.netty.channel.socket.SocketTcpServer`
+> * `com.whosly.stars.netty.channel.socket.TcpServerHandler`
+> * `com.whosly.stars.netty.channel.socket.ServerHeartbeatHandler`
 
 **执行效果**
 SocketTcpClient
@@ -181,11 +181,11 @@ SocketTcpServer
 应用场景：需要在同一进程的不同组件间进行高效通信的场景。
 
 **示例代码** 
-> * `com.yueny.stars.netty.channel.local.LocalMainWithSameJVM`
-> * `com.yueny.stars.netty.channel.local.LocalServer`
-> * `com.yueny.stars.netty.channel.local.LocalServerHandler`
-> * `com.yueny.stars.netty.channel.local.LocalClient`
-> * `com.yueny.stars.netty.channel.local.LocalClientHandler`
+> * `com.whosly.stars.netty.channel.local.LocalMainWithSameJVM`
+> * `com.whosly.stars.netty.channel.local.LocalServer`
+> * `com.whosly.stars.netty.channel.local.LocalServerHandler`
+> * `com.whosly.stars.netty.channel.local.LocalClient`
+> * `com.whosly.stars.netty.channel.local.LocalClientHandler`
 > 
 > 注意： 因为 LocalChannel 只能在同一 JVM 内通信；直接运行 LocalServer、LocalClient 时，没有在同 JVM 里先启动并绑定 LocalServer("my-local-server")，因此本地地址 local:my-local-server 未被绑定，出现 connection refused。
 > 需要在此处运行，用于模拟同一进程内先起 LocalServer 再起 LocalClient。
@@ -236,18 +236,18 @@ Netty 中的DomainSocketChannel是对 Unix 域套接字的抽象，其核心实�
 **示例代码**
 Unix Domain Socket 示例，区分 Linux(epoll) 与 macOS(kqueue) 两套代码:
 * Linux/epoll (Only supported on Linux)
-  + `com.yueny.stars.netty.channel.uds.epoll.UdsEpollServer`、`com.yueny.stars.netty.channel.uds.epoll.UdsEpollServerHandler`
-  + `com.yueny.stars.netty.channel.uds.epoll.UdsEpollClient`、`com.yueny.stars.netty.channel.uds.epoll.UdsEpollClientHandler`
+  + `com.whosly.stars.netty.channel.uds.epoll.UdsEpollServer`、`com.whosly.stars.netty.channel.uds.epoll.UdsEpollServerHandler`
+  + `com.whosly.stars.netty.channel.uds.epoll.UdsEpollClient`、`com.whosly.stars.netty.channel.uds.epoll.UdsEpollClientHandler`
 * macOS/kqueue (Only supported on OSX/BSD)
-  + `com.yueny.stars.netty.channel.uds.kqueue.UdsKqueueServer`、`com.yueny.stars.netty.channel.uds.kqueue.UdsKqueueServerHandler`
-  + `com.yueny.stars.netty.channel.uds.kqueue.UdsKqueueClient`、`com.yueny.stars.netty.channel.uds.kqueue.UdsKqueueClientHandler`
+  + `com.whosly.stars.netty.channel.uds.kqueue.UdsKqueueServer`、`com.whosly.stars.netty.channel.uds.kqueue.UdsKqueueServerHandler`
+  + `com.whosly.stars.netty.channel.uds.kqueue.UdsKqueueClient`、`com.whosly.stars.netty.channel.uds.kqueue.UdsKqueueClientHandler`
 
 
 ### FileChannel
 用于文件 I/O 操作(文件的数据读写)的通道，支持文件的读写和映射操作。
 
 **示例代码**
-`com.yueny.stars.netty.channel.file.NettyFileOperationExample`
+`com.whosly.stars.netty.channel.file.NettyFileOperationExample`
 
 ```
 try (FileChannel inChannel = FileChannel.open(sourcePath, StandardOpenOption.READ)) {
@@ -276,7 +276,7 @@ try (FileChannel inChannel = FileChannel.open(sourcePath, StandardOpenOption.REA
 用于单元测试的嵌入式通道，不需要实际的网络连接。
 
 **示例代码**
-`com.yueny.stars.netty.channel.embedded.EmbeddedChannelExample`
+`com.whosly.stars.netty.channel.embedded.EmbeddedChannelExample`
 
 ```
 // 创建嵌入式通道，添加测试处理器
@@ -325,7 +325,7 @@ NioDatagramChannel 是 Netty 对 Java NIO DatagramChannel 的封装，用于 UDP
 3. 在客户端输入消息，观察服务器和客户端的输出
 
 **示例代码**
-* 启动服务器端 `com.yueny.stars.netty.channel.datagram.pointtopoint.UdpServer`
+* 启动服务器端 `com.whosly.stars.netty.channel.datagram.pointtopoint.UdpServer`
 > 代码说明
 > 使用 Bootstrap 而不是 ServerBootstrap：UDP 是无连接的，不需要像 TCP 那样区分服务器和客户端引导类。 
 > 绑定端口：UDP 服务器只需绑定到特定端口即可接收数据报。 
@@ -333,7 +333,7 @@ NioDatagramChannel 是 Netty 对 Java NIO DatagramChannel 的封装，用于 UDP
 > 响应客户端：通过从接收的数据包中获取发送方地址，可以直接向该地址发送响应。
 
 
-* 启动客户端 `com.yueny.stars.netty.channel.datagram.pointtopoint.UdpClient`
+* 启动客户端 `com.whosly.stars.netty.channel.datagram.pointtopoint.UdpClient`
 > 绑定到随机端口：UDP 客户端通常不需要固定端口，可以绑定到 0 让系统分配可用端口。 
 > 指定目标地址：每次发送数据时都需要指定目标服务器的地址和端口。 
 > 接收响应：客户端也需要能够接收服务器返回的响应数据。
@@ -382,8 +382,8 @@ UDP 服务器已启动，监听端口：8080
 3. 所有接收器都会收到广播消息
 
 **示例代码**
-* 启动广播发送器 `com.yueny.stars.netty.channel.datagram.broadcast.UdpBroadcastSender`
-* 启动广播接收器 `com.yueny.stars.netty.channel.datagram.broadcast.UdpBroadcastReceiver`
+* 启动广播发送器 `com.whosly.stars.netty.channel.datagram.broadcast.UdpBroadcastSender`
+* 启动广播接收器 `com.whosly.stars.netty.channel.datagram.broadcast.UdpBroadcastReceiver`
 
 
 #### 向特定组发送消息
@@ -395,6 +395,6 @@ UDP 服务器已启动，监听端口：8080
 3. 所有加入多播组的接收器都会收到消息
 
 **示例代码**
-* 启动广播发送器 `com.yueny.stars.netty.channel.datagram.multi.UdpMulticastSender`
-* 启动广播接收器 `com.yueny.stars.netty.channel.datagram.multi.UdpMulticastReceiver`
+* 启动广播发送器 `com.whosly.stars.netty.channel.datagram.multi.UdpMulticastSender`
+* 启动广播接收器 `com.whosly.stars.netty.channel.datagram.multi.UdpMulticastReceiver`
 

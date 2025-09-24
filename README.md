@@ -93,10 +93,10 @@ mvn install -pl 09.netty-see
 ```bash
 # 启动聊天服务器
 cd 1.netty/05.chats
-mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.chats.server.ChatsServer"
+mvn exec:java -Dexec.mainClass="com.whosly.stars.netty.chats.server.ChatsServer"
 
 # 启动聊天客户端（新终端）
-mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.chats.client.ChatsClient"
+mvn exec:java -Dexec.mainClass="com.whosly.stars.netty.chats.client.ChatsClient"
 ```
 
 #### 2. 监控系统体验：

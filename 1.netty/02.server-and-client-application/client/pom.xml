@@ -18,7 +18,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.yueny.study.netty.application.client.EchoClient</mainClass>
+                    <mainClass>com.whosly.stars.netty.application.client.EchoClient</mainClass>
                     <arguments>
                         <argument>${echo-server.hostname}</argument>
                         <argument>${echo-server.port}</argument>

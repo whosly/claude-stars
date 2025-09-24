@@ -23,15 +23,18 @@
         <!-- <spring-boot.version>2.0.9.RELEASE</spring-boot.version>-->
         <!-- JDK 8、JDK 11 -->
 <!--        <spring-boot.version>2.1.18.RELEASE</spring-boot.version>-->
+<!--		<spring-boot.version>2.4.4</spring-boot.version>-->
         <spring-boot.version>2.5.15</spring-boot.version>
+		<spring-cloud.version>2020.0.1</spring-cloud.version>
 
         <!-- Spring Boot 2.x 适配 springdoc -->
         <springdoc-openapi.version>1.6.15</springdoc-openapi.version>
 	</properties>
 
-<!--	<modules>-->
-<!--		-->
-<!--	</modules>-->
+	<modules>
+		<module>listener</module>
+		<module>springboot2-webflux</module>
+	</modules>
 
 	<dependencyManagement>
 		<dependencies>
@@ -39,6 +42,14 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
 				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

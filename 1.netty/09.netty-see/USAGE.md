@@ -44,7 +44,7 @@ mvn spring-boot:run
 cd 05.chats
 
 # 启动聊天服务器
-mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.chats.server.ChatsServer"
+mvn exec:java -Dexec.mainClass="com.whosly.stars.netty.chats.server.ChatsServer"
 ```
 
 聊天服务器启动时会：
@@ -57,7 +57,7 @@ mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.chats.server.ChatsServer"
 
 ```bash
 # 在另一个终端启动客户端
-mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.chats.client.ChatsClient"
+mvn exec:java -Dexec.mainClass="com.whosly.stars.netty.chats.client.ChatsClient"
 ```
 
 ### 4. 查看监控数据
@@ -204,8 +204,8 @@ public class YourChannelInitializer extends ChannelInitializer<SocketChannel> {
 
 ```xml
 <!-- 监控代理日志 -->
-<logger name="com.yueny.stars.netty.monitor.agent" level="INFO"/>
+<logger name="com.whosly.stars.netty.monitor.agent" level="INFO"/>
 
-<!-- 监控服务器日志 -->
-<logger name="com.yueny.stars.netty.visualizer.server" level="INFO"/>
+        <!-- 监控服务器日志 -->
+<logger name="com.whosly.stars.netty.visualizer.server" level="INFO"/>
 ```

@@ -56,19 +56,19 @@ mvn -q -DskipTests clean package
 ```
 
 ### 运行 0.6 示例
-1. 启动服务端：运行 `msgpack-0.6` 中的 `com.yueny.stars.netty.msgpack.server.ServerV6`。
-2. 启动客户端：运行 `msgpack-0.6` 中的 `com.yueny.stars.netty.msgpack.client.ClientV6`。
+1. 启动服务端：运行 `msgpack-0.6` 中的 `com.whosly.stars.netty.msgpack.server.ServerV6`。
+2. 启动客户端：运行 `msgpack-0.6` 中的 `com.whosly.stars.netty.msgpack.client.ClientV6`。
 3. 默认端口 `8883`，使用 2 字节长度头；观察服务端/客户端日志。
 
 ### 运行 0.9 示例
-1. 启动服务端：运行 `msgpack-0.9` 中的 `com.yueny.stars.netty.msgpack.server.ServerV9`。
-2. 启动客户端：运行 `msgpack-0.9` 中的 `com.yueny.stars.netty.msgpack.client.ClientV9`。
+1. 启动服务端：运行 `msgpack-0.9` 中的 `com.whosly.stars.netty.msgpack.server.ServerV9`。
+2. 启动客户端：运行 `msgpack-0.9` 中的 `com.whosly.stars.netty.msgpack.client.ClientV9`。
 3. 同样监听 `8883`，采用 0.9 的字段级打包/解包。
 
 ### 运行 0.9 心跳与重连示例
-1. 启动服务端：运行 `msgpack-0.9-heartbeat` 中的 `com.yueny.stars.netty.msgpack.heartbeat.server.Server`。
+1. 启动服务端：运行 `msgpack-0.9-heartbeat` 中的 `com.whosly.stars.netty.msgpack.heartbeat.server.Server`。
    - 服务端管线包含 `IdleStateHandler`，会触发空闲事件（读 5s / 写 7s / 总 10s）。
-2. 启动客户端：运行 `msgpack-0.9-heartbeat` 中的 `com.yueny.stars.netty.msgpack.heartbeat.client.Client`。
+2. 启动客户端：运行 `msgpack-0.9-heartbeat` 中的 `com.whosly.stars.netty.msgpack.heartbeat.client.Client`。
    - 客户端含定时任务与重连机制，周期性构造并发送 `HeartbeatData`。
 3. 断开/恢复网络或停止/重启服务端，可观察客户端重连与心跳行为。
 
@@ -104,8 +104,8 @@ mvn -q -DskipTests clean package
 - common
   - 位置：`08.msgpack/common`
   - 主要类：
-    - `com.yueny.stars.netty.msgpack.domain.HeartbeatData`：心跳与业务数据载体（type/seatId/speed/memo）
-    - `com.yueny.stars.netty.msgpack.domain.TypeData`：类型常量（PING/PONG/CUSTOME 等）
+    - `com.whosly.stars.netty.msgpack.domain.HeartbeatData`：心跳与业务数据载体（type/seatId/speed/memo）
+    - `com.whosly.stars.netty.msgpack.domain.TypeData`：类型常量（PING/PONG/CUSTOME 等）
 
 - msgpack-0.6
   - 位置：`08.msgpack/msgpack-0.6`

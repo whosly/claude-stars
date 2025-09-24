@@ -9,12 +9,12 @@
     </appender>
 
     <!-- 聊天服务器日志 -->
-    <logger name="com.yueny.stars.netty.chats" level="INFO" additivity="false">
+    <logger name="com.whosly.stars.netty.chats" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 
     <!-- 监控代理日志 -->
-    <logger name="com.yueny.stars.netty.monitor.agent" level="DEBUG" additivity="false">
+    <logger name="com.whosly.stars.netty.monitor.agent" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 

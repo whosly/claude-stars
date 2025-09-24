@@ -9,7 +9,7 @@
     </appender>
 
     <!-- 监控代理相关日志 -->
-    <logger name="com.yueny.stars.netty.monitor.agent" level="INFO" additivity="false">
+    <logger name="com.whosly.stars.netty.monitor.agent" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 

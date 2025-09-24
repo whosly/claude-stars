@@ -1,0 +1,16 @@
+package com.whosly.stars.netty.handler.decoder.domain;
+
+import lombok.Builder;
+import lombok.Data;
+
+/**
+ * @author fengyang
+ * @date 2025-08-18 09:46:49
+ * @description
+ */
+@Data
+@Builder
+public class ResponseData {
+
+    private String stringValue;
+}

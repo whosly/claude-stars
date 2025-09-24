@@ -123,7 +123,7 @@ spring:
 
 logging:
   level:
-    com.yueny.stars.netty.visualizer: DEBUG
+    com.whosly.stars.netty.visualizer: DEBUG
     org.springframework.web.socket: DEBUG
 ```
 

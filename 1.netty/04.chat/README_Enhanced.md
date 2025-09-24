@@ -5,7 +5,7 @@
 这是一个 Netty 聊天系统，服务端支持向固定用户发送消息、广播给所有客户端发送消息。
 
 ## enhanced 功能
-* 服务端：com.yueny.study.netty.chat.server.enhanced 
+* 服务端：com.whosly.stars.netty.chat.server.enhanced 
   + EnhancedChatServer：调用 start(PORT, new EnhancedServerChannelInitializer(), consumer)；consumer 打印启动指引 
   + EnhancedServerChannelInitializer：挂载 StringDecoder、StringEncoder、EnhancedChatServerHandler 
   + EnhancedChatServerHandler：支持 
@@ -14,13 +14,13 @@
     - /users 查看在线用户（用户名与ID） 
     - 普通消息仅回发发送者；#广播: 可选广播
 
-* 客户端：com.yueny.study.netty.chat.client.enhanced 
+* 客户端：com.whosly.stars.netty.chat.client.enhanced 
   + EnhancedChatClient：基于 Netty Bootstrap 启动，添加字符串编解码器与 EnhancedChatClientHandler，使用 try-with-resources 管理 Scanner 
   + EnhancedChatClientHandler：打印消息、连接/断开提示与异常处理
 
 ## 使用方法
-* 启动服务端：com.yueny.study.netty.chat.server.enhanced.EnhancedChatServer
-* 启动客户端：com.yueny.study.netty.chat.client.enhanced.EnhancedChatClient
+* 启动服务端：com.whosly.stars.netty.chat.server.enhanced.EnhancedChatServer
+* 启动客户端：com.whosly.stars.netty.chat.client.enhanced.EnhancedChatClient
   + 客户端在启动时，会要求用户输入自定义用户名。该用户名自定义之后， 客户端会连接建立后自动发送一次“/name 用户名”，服务端的 EnhancedChatServerHandler 会用该用户名替换临时名，从而完成用户名与该 channel ID 的绑定。。
 * 命令与格式：
   + 私聊：@用户名:消息 或 @ID:消息 

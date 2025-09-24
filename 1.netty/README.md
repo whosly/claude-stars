@@ -230,10 +230,10 @@ mvn install -pl 09.netty-see
 ```bash
 # 启动聊天服务器
 cd 05.chats
-mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.chats.server.ChatsServer"
+mvn exec:java -Dexec.mainClass="com.whosly.stars.netty.chats.server.ChatsServer"
 
 # 启动聊天客户端（新终端）
-mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.chats.client.ChatsClient"
+mvn exec:java -Dexec.mainClass="com.whosly.stars.netty.chats.client.ChatsClient"
 ```
 
 **2. 监控系统体验：**
@@ -249,12 +249,12 @@ mvn spring-boot:run
 ```bash
 # TCP Socket 通信示例
 cd 07.netty-channel
-mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.channel.socket.SocketTcpServer"
-mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.channel.socket.SocketTcpClient"
+mvn exec:java -Dexec.mainClass="com.whosly.stars.netty.channel.socket.SocketTcpServer"
+mvn exec:java -Dexec.mainClass="com.whosly.stars.netty.channel.socket.SocketTcpClient"
 
 # UDP 通信示例
-mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.channel.datagram.pointtopoint.UdpServer"
-mvn exec:java -Dexec.mainClass="com.yueny.stars.netty.channel.datagram.pointtopoint.UdpClient"
+mvn exec:java -Dexec.mainClass="com.whosly.stars.netty.channel.datagram.pointtopoint.UdpServer"
+mvn exec:java -Dexec.mainClass="com.whosly.stars.netty.channel.datagram.pointtopoint.UdpClient"
 ```
 
 # 📖 相关资源

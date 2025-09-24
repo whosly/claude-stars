@@ -69,8 +69,8 @@ ByteBuf buf = ctx.alloc();
 
 3. 首先实例化 ByteBufAllocator， 再实例化 ByteBuf
 * 实例化 ByteBufAllocator
-  + `com.yueny.stars.netty.buffer.allocator.ByteBufAllocatorFactory`: ByteBufAllocator 实例化工厂
-  + `com.yueny.stars.netty.buffer.allocator.ByteBufAllocatorFactoryTest`: 测试用例
+  + `com.whosly.stars.netty.buffer.allocator.ByteBufAllocatorFactory`: ByteBufAllocator 实例化工厂
+  + `com.whosly.stars.netty.buffer.allocator.ByteBufAllocatorFactoryTest`: 测试用例
 
 ```
 # Default ByteBufAllocator
@@ -85,9 +85,9 @@ ByteBufAllocator alloc = channel.alloc();
 ```
 
 * 再通过 ByteBufAllocator 实例化 ByteBuf
-  + `com.yueny.stars.netty.buffer.buf.ByteBufExample`: ByteBuf 的实例化方式例子
-  + `com.yueny.stars.netty.buffer.buf.ByteBufExampleTest`: 测试用例
-  + `com.yueny.stars.netty.buffer.ByteBufPositionTest`: 关于 ByteBufPosition 的测试用例
+  + `com.whosly.stars.netty.buffer.buf.ByteBufExample`: ByteBuf 的实例化方式例子
+  + `com.whosly.stars.netty.buffer.buf.ByteBufExampleTest`: 测试用例
+  + `com.whosly.stars.netty.buffer.ByteBufPositionTest`: 关于 ByteBufPosition 的测试用例
 
 ```
 ByteBufAllocator alloc = ...
@@ -185,7 +185,7 @@ public abstract class ByteBuffer {
 Netty 通过一个 ByteBuf 子类——CompositeByteBuf——实现了这个模式， 它提供了一个将多个缓冲区表示为单个合并缓冲区的虚拟表示。
 
 使用 CompositeByteBuf 的复合缓冲区模式的一个使用例子。
-源代码路径: `com.yueny.stars.netty.buffer.buf.CompositeBufferExample`
+源代码路径: `com.whosly.stars.netty.buffer.buf.CompositeBufferExample`
 
 ```
 public static void compositeBuffer() {
