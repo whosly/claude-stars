@@ -24,6 +24,7 @@
 		<netty.version>4.1.94.Final</netty.version>
 		<lombok.version>1.18.24</lombok.version>
         <mysql.version>8.3.0</mysql.version>
+		<reactor.version>3.7.4</reactor.version>
 
 		<!-- test com.yueny.study.netty.application.client -->
 		<junit.version>5.11.2</junit.version>
@@ -101,6 +102,19 @@
 				<artifactId>hutool-all</artifactId>
 				<version>${hutool.version}</version>
 			</dependency>
+
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-core</artifactId>
+				<version>${reactor.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-test</artifactId>
+				<version>${reactor.version}</version>
+				<scope>test</scope>
+			</dependency>
+
 			<!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
 			<dependency>
 				<groupId>com.alibaba</groupId>

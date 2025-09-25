@@ -23,6 +23,7 @@
 	<modules>
 		<module>jvm-stat</module>
 		<module>delay-response</module>
+		<module>reactor</module>
 	</modules>
 
 	<build>
