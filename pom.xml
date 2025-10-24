@@ -16,6 +16,10 @@
 		<skipTest>true</skipTest>
 
 		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
+		<!-- bc库-->
+		<bcprov-jdk18on.version>1.78.1</bcprov-jdk18on.version>
+		<bcpkix-jdk18on.version>1.78.1</bcpkix-jdk18on.version>
+		<bc-fips.version>1.0.2.4</bc-fips.version>
 		<commons.collections4.version>4.0</commons.collections4.version>
 
 <!--		<google.guava.version>27.0.1-jre</google.guava.version>-->
@@ -23,6 +27,8 @@
 		<hutool.version>5.6.1</hutool.version>
 		<netty.version>4.1.94.Final</netty.version>
 		<lombok.version>1.18.24</lombok.version>
+		<!-- org-mapstruct-->
+		<org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <mysql.version>8.3.0</mysql.version>
 		<reactor.version>3.7.4</reactor.version>
 
@@ -40,6 +46,7 @@
 		<module>5.springboot2</module>
 		<module>6.springboot3</module>
 		<module>7.java</module>
+		<module>8.cryptology</module>
 	</modules>
 
 	<dependencyManagement>
@@ -82,6 +89,24 @@
 				<artifactId>commons-lang3</artifactId>
 				<version>${apache.commons.lang3.version}</version>
 			</dependency>
+
+			<!-- bc库 -->
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk18on</artifactId>
+				<version>${bcprov-jdk18on.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk18on</artifactId>
+				<version>${bcpkix-jdk18on.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bc-fips</artifactId>
+				<version>${bc-fips.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-io</artifactId>
@@ -101,6 +126,12 @@
 				<groupId>cn.hutool</groupId>
 				<artifactId>hutool-all</artifactId>
 				<version>${hutool.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.mapstruct</groupId>
+				<artifactId>mapstruct</artifactId>
+				<version>${org.mapstruct.version}</version>
 			</dependency>
 
 			<dependency>
