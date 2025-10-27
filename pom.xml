@@ -13,7 +13,7 @@
 	<properties>
 		<file.encoding>UTF-8</file.encoding>
 		<project.build.sourceEncoding>${file.encoding}</project.build.sourceEncoding>
-		<skipTest>true</skipTest>
+		<skipTest>false</skipTest>
 
 		<apache.commons.lang3.version>3.9</apache.commons.lang3.version>
 		<!-- bc库-->

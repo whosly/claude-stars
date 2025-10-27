@@ -145,6 +145,24 @@ LocalDate encrypted = dateFPE.encrypt(LocalDate.of(2023, 6, 15));
 LocalDate decrypted = dateFPE.decrypt(encrypted);
 ```
 
+### Feistel网络加密算法
+Feistel网络加密算法是一种基于Feistel网络的密码学算法，用于加密数据。
+
+标准的Feistel网络加密过程：
+
+1. L0, R0 = 分割输入
+2. 对于每一轮i：
+  * L{i+1} = Ri
+  * R{i+1} = Li ⊕ F(R_i, K_i)
+3. 输出 R_n, L_n（注意顺序）
+
+标准的Feistel网络解密过程：
+1. R_n, L_n = 分割输入
+2. 对于每一轮i（逆序）：
+  * R_i = L{i+1}
+  * L_i = R{i+1} ⊕ F(L{i+1}, K_i)
+3. 输出 L0, R0（注意顺序）
+
 ## 测试
 
 模块包含完整的单元测试，确保各种加密算法和模式的正确性：

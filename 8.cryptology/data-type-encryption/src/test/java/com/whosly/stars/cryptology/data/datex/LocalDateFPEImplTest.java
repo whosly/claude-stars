@@ -23,7 +23,10 @@ class LocalDateFPEImplTest {
         // 1. 配置 FPE
         FPEConfig config = new FPEConfig.Builder()
                 .keyFromBase64("MDEyMzQ1Njc4OUFCQ0RFRg==") // 16字节密钥的Base64
-                .dateRange(LocalDate.of(2000, 1, 1), LocalDate.of(2030, 12, 31))
+                .dateRange(
+                        LocalDate.of(2000, 1, 1),
+                        LocalDate.of(2081, 12, 30)
+                )
                 .rounds(10)
                 .build();
 
@@ -34,7 +37,10 @@ class LocalDateFPEImplTest {
     public void testSingle() {
         FPEConfig config = new FPEConfig.Builder()
                 .keyFromBase64("MDEyMzQ1Njc4OUFCQ0RFRg==") // 16字节密钥的Base64
-                .dateRange(LocalDate.of(2000, 1, 1), LocalDate.of(2030, 12, 31))
+                .dateRange(
+                        LocalDate.of(2000, 1, 1),
+                        LocalDate.of(2080, 12, 30)
+                )
                 .rounds(10)
                 .build();
 
@@ -67,16 +73,19 @@ class LocalDateFPEImplTest {
     @Test
     public void testSimple() {
         LocalDate[] testDates = {
-                this.fpe.getMinDate(),
-                this.fpe.getMaxDate(),
+                this.fpe.getMinDate().plusDays(2),
                 this.fpe.getMinDate().plusDays(1),
+                this.fpe.getMaxDate().minusDays(2),
                 this.fpe.getMaxDate().minusDays(1),
-                this.fpe.getMinDate().plusDays(this.fpe.getTotalDays().longValue() / 2)
+                this.fpe.getMinDate().plusDays(this.fpe.getTotalDays().longValue() / 2),
+                this.fpe.getMaxDate(),
+                this.fpe.getMinDate()
         };
 
         for (LocalDate testDate : testDates) {
             LocalDate encrypted = this.fpe.encrypt(testDate);
             LocalDate decrypted = this.fpe.decrypt(encrypted);
+
             assertTrue(testDate.equals(decrypted), "testDate:"+testDate+", decrypted: "+decrypted+", encrypted: " + encrypted);
         }
     }
