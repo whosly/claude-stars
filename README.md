@@ -65,6 +65,11 @@ Docker 容器化实践项目，包含多个 Dockerfile 示例：
 #### Avatica 集成
 - **48.avacita**: 基于 Avatica 实现 JDBC 驱动连接和查询，支持 SQL 改写和脱敏处理
 
+### 8. 密码学模块 (8.cryptology)
+密码学工程实践项目，包含数据类型加密等子模块：
+
+#### 数据类型加密
+- **data-type-encryption**: 支持多种数据类型的加密实现，包括字符型(AES/SM4)、长整型(FPE)、日期型(FPE)等加密算法
 
 ## 快速开始
 
@@ -131,6 +136,16 @@ cd 3.docker/32.dockerfile-alpine-hello
 docker build -t dockerfile-alpine-hello:0.1 .
 ```
 
+#### 5. 密码学模块体验：
+```bash
+# 构建密码学模块
+cd 8.cryptology/data-type-encryption
+mvn clean install
+
+# 运行测试
+mvn test
+```
+
 ## 模块详细说明
 
 ### Netty 模块
@@ -161,6 +176,16 @@ Calcite 模块基于语法解析和 AST 生成的编译器模式，实现了：
 2. **自定义语法**: 扩展 SQL 语法，支持物化视图等新特性
 3. **查询优化**: 基于规则的查询优化实现
 4. **Avatica 集成**: JDBC 驱动实现和 SQL 脱敏处理
+
+### 密码学模块
+
+密码学模块基于 Bouncy Castle 和 Java Security 实现，提供了多种数据类型的加密解决方案：
+
+1. **字符型加密**: 支持 AES 和 SM4 算法，涵盖多种加密模式（CBC、ECB、CTR、OFB、CFB）和填充模式（NoPadding、PKCS7Padding、PKCS5Padding）
+2. **数值型加密**: 基于 Feistel 网络实现的长整型格式保留加密（FPE），保持加密前后数据格式一致
+3. **日期型加密**: 基于 Feistel 网络实现的日期格式保留加密，支持自定义日期范围
+4. **国密支持**: 完整实现 SM4 国密算法，满足国内密码标准要求
+5. **格式保留加密**: 保持加密前后数据的格式和长度不变，适用于敏感数据脱敏场景
 
 ## 开发环境搭建
 

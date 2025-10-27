@@ -1,15 +1,17 @@
 package com.whoslt.avacita.client;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.sql.*;
 import java.util.Properties;
 
 import static com.whosly.avacita.client.AvacitaClient.printResult;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class InsertTest {
-    @Before
+    @BeforeEach
     public void before() throws ClassNotFoundException {
         Class.forName("com.whosly.avacita.driver.EncDriver");
     }

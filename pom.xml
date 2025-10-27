@@ -395,6 +395,12 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-launcher</artifactId>
+				<version>1.11.4</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.openjdk.jmh</groupId>
 				<artifactId>jmh-core</artifactId>
 				<version>${jmh.version}</version>
@@ -455,5 +461,11 @@
 
 	</build>
 
+	<repositories>
+		<repository>
+			<id>aliyun</id>
+			<url>https://maven.aliyun.com/repository/public</url>
+		</repository>
+	</repositories>
 
 </project>
