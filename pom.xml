@@ -24,7 +24,7 @@
 
 <!--		<google.guava.version>27.0.1-jre</google.guava.version>-->
 		<google.guava.version>33.3.0-jre</google.guava.version>
-		<hutool.version>5.6.1</hutool.version>
+		<hutool.version>5.7.12</hutool.version>
 		<netty.version>4.1.94.Final</netty.version>
 		<lombok.version>1.18.24</lombok.version>
 		<!-- org-mapstruct-->
@@ -98,13 +98,26 @@
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk15to18</artifactId>
+				<version>${bcprov-jdk18on.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-jdk18on</artifactId>
 				<version>${bcpkix-jdk18on.version}</version>
 			</dependency>
+			<!-- 专门的FPE库-01 -->
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bc-fips</artifactId>
 				<version>${bc-fips.version}</version>
+			</dependency>
+			<!-- 专门的FPE库-02 -->
+			<dependency>
+				<groupId>com.idealista</groupId>
+				<artifactId>format-preserving-encryption</artifactId>
+				<version>1.0.0</version>
 			</dependency>
 
 			<dependency>

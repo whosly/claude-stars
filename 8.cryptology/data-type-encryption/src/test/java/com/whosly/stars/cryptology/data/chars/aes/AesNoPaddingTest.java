@@ -12,7 +12,7 @@ import java.security.Security;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class NoPaddingTest {
+public class AesNoPaddingTest {
     static {
         try {
             Security.addProvider(new BouncyCastleProvider());
