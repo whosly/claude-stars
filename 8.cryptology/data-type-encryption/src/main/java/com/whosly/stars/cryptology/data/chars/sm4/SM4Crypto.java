@@ -14,7 +14,6 @@ import java.util.Optional;
 /**
  * @author fengyang
  * @date 2025-10-23 14:51:05
- * @description
  */
 public class SM4Crypto {
     private static final byte[] DEFAULT_IV = new byte[16];
@@ -92,31 +91,29 @@ public class SM4Crypto {
         // 计算需要填充的长度，确保总长度是SM4块大小的倍数
         int paddingLength = SM4_BLOCK_SIZE - (data.length % SM4_BLOCK_SIZE);
         
-        // 如果原始数据长度已经是块大小的倍数，仍然需要添加一个完整的填充块
-        // 这是为了确保解密时能正确识别和移除填充
-        if (paddingLength == 0) {
-            paddingLength = SM4_BLOCK_SIZE;
+        // 如果原始数据长度已经是块大小的倍数，不需要添加额外的填充
+        if (paddingLength == SM4_BLOCK_SIZE) {
+            paddingLength = 0;
         }
         
-        // 创建新的字节数组，长度为原始数据长度+填充长度
-        byte[] paddedData = new byte[data.length + paddingLength];
-        
-        // 复制原始数据
-        System.arraycopy(data, 0, paddedData, 0, data.length);
-        
-        // 填充数据使用特殊标记
-        for (int i = data.length; i < paddedData.length - 4; i++) {
-            paddedData[i] = PADDING_MARKER;
+        // 如果需要填充
+        if (paddingLength > 0) {
+            // 创建新的字节数组，长度为原始数据长度+填充长度
+            byte[] paddedData = new byte[data.length + paddingLength];
+            
+            // 复制原始数据
+            System.arraycopy(data, 0, paddedData, 0, data.length);
+            
+            // 使用0填充
+            for (int i = data.length; i < paddedData.length; i++) {
+                paddedData[i] = 0;
+            }
+            
+            return paddedData;
         }
         
-        // 在填充数据中存储原始数据的长度信息，使用最后4个字节存储原始数据长度
-        int originalLength = data.length;
-        paddedData[paddedData.length - 4] = (byte) (originalLength & 0xFF);
-        paddedData[paddedData.length - 3] = (byte) ((originalLength >> 8) & 0xFF);
-        paddedData[paddedData.length - 2] = (byte) ((originalLength >> 16) & 0xFF);
-        paddedData[paddedData.length - 1] = (byte) ((originalLength >> 24) & 0xFF);
-        
-        return paddedData;
+        // 如果不需要填充，直接返回原始数据
+        return data;
     }
     
     /**
@@ -130,19 +127,20 @@ public class SM4Crypto {
      * @return 移除填充后的原始数据
      */
     private static byte[] smartRemoveNoPadding(byte[] data) {
-        // 从填充数据中读取原始数据长度信息，使用最后4个字节存储原始数据长度
-        int originalLength = (data[data.length - 1] & 0xFF) << 24 |
-                            (data[data.length - 2] & 0xFF) << 16 |
-                            (data[data.length - 3] & 0xFF) << 8 |
-                            (data[data.length - 4] & 0xFF);
-        
-        // 验证长度信息的有效性
-        if (originalLength >= 0 && originalLength <= data.length - 4) {
-            return Arrays.copyOf(data, originalLength);
+        // 计算原始数据长度（通过检查末尾的0填充）
+        int originalLength = data.length;
+        // 从末尾开始查找第一个非0字节的位置
+        while (originalLength > 0 && data[originalLength - 1] == 0) {
+            originalLength--;
         }
-        
-        // 如果长度信息无效，返回所有数据（这种情况不应该发生）
-        return data;
+
+        // 如果所有字节都是0，返回原始数据
+        if (originalLength == 0) {
+            return data;
+        }
+
+        // 返回去除填充后的数据
+        return Arrays.copyOf(data, originalLength);
     }
 
     private static String getTransformation(EncMode encMode, PaddingMode paddingMode) {

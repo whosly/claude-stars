@@ -172,7 +172,7 @@ public class SM4CryptoTest {
         byte[] enValue = this.sm4Crypto.encrypt(context, sm4Key, encMode, paddingMode, iv);
 
         byte[] de_value = this.sm4Crypto.decrypt(enValue, sm4Key, encMode, paddingMode, iv);
-        String ming_wen = new String(de_value, StandardCharsets.UTF_8);
-        assertEquals(context, ming_wen, "Decrypted text should match original for enc:" + encMode + ", padding:" + paddingMode);
+        // 直接比较字节数组，而不是将解密结果转换为字符串再比较
+        assertArrayEquals(context, de_value, "Decrypted bytes should match original for enc:" + encMode + ", padding:" + paddingMode);
     }
 }
