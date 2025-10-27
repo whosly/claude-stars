@@ -29,7 +29,7 @@ public class FPEAlphabetFactory {
         for (CharacterSet characterSet : CharacterSet.values()) {
             AlphabetMapper mapper = new BasicAlphabetMapper(characterSet.getChars());
 
-            fpeInstances.put(characterSet, FPEFactory.getFF1(key, tweak, mapper));
+            fpeInstances.put(characterSet, FPEFactory.getFF1(key.clone(), tweak != null ? tweak.clone() : new byte[0], mapper));
         }
 
         return fpeInstances;
@@ -50,7 +50,7 @@ public class FPEAlphabetFactory {
         for (CharacterSet characterSet : CharacterSet.values()) {
             AlphabetMapper mapper = new BasicAlphabetMapper(characterSet.getChars());
 
-            fpeInstances.put(characterSet, FPEFactory.getFF3(key, tweak, mapper));
+            fpeInstances.put(characterSet, FPEFactory.getFF3(key.clone(), tweak != null ? tweak.clone() : new byte[0], mapper));
         }
 
         return fpeInstances;

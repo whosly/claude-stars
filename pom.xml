@@ -98,12 +98,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15to18</artifactId>
-				<version>${bcprov-jdk18on.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-jdk18on</artifactId>
 				<version>${bcpkix-jdk18on.version}</version>
 			</dependency>
@@ -135,6 +129,7 @@
 				<artifactId>guava</artifactId>
 				<version>${google.guava.version}</version>
 			</dependency>
+			<!-- 专门的FPE库-04 -->
 			<dependency>
 				<groupId>cn.hutool</groupId>
 				<artifactId>hutool-all</artifactId>

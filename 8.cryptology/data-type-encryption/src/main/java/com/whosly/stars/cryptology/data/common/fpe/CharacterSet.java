@@ -8,8 +8,13 @@ package com.whosly.stars.cryptology.data.common.fpe;
  * @description
  */
 public enum CharacterSet {
+    /**
+     * Long 最大长度 19位
+     */
     NUMERIC("0123456789", 1, 20),
+
     DATE("0123456789-", 10, 10),
+
     PHONE_ZH("0123456789", 11, 11),
     ALPHA_NUMERIC("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 1, 50),
     LOWER_ALPHA_NUMERIC("0123456789abcdefghijklmnopqrstuvwxyz", 1, 50);

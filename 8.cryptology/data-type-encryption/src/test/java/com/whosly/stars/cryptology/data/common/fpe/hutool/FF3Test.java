@@ -3,7 +3,9 @@ package com.whosly.stars.cryptology.data.common.fpe.hutool;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.symmetric.fpe.FPE;
 import com.whosly.stars.cryptology.data.common.fpe.CharacterSet;
+import com.whosly.stars.cryptology.data.common.fpe.Keys;
 import org.bouncycastle.crypto.util.BasicAlphabetMapper;
+import org.junit.jupiter.api.Test;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -12,15 +14,16 @@ import java.security.NoSuchAlgorithmException;
  * @date 2025-10-27 11:13:09
  * @description
  */
-public class FF3Example extends AbstractFpePrepare {
+public class FF3Test extends AbstractFpePrepare {
 
     private static FPE fpe = null;
 
-    public static void main(String[] args) throws NoSuchAlgorithmException {
+    @Test
+    public void textExample() throws NoSuchAlgorithmException {
         // 映射字符表，规定了明文和密文的字符范围
         BasicAlphabetMapper numberMapper = new BasicAlphabetMapper(CharacterSet.PHONE_ZH.getChars());
 
-        fpe = FPEFactory.getFF3(genAESKey(),
+        fpe = FPEFactory.getFF3(Keys.genAesKey(),
                 // 此处FF3规定tweak为56bit（即7bytes）
                 new byte[7], numberMapper);
 

@@ -2,9 +2,7 @@ package com.whosly.stars.cryptology.data.common.fpe.hutool;
 
 import cn.hutool.crypto.symmetric.fpe.FPE;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * FPE经典算法实现。
@@ -18,17 +16,6 @@ import java.security.NoSuchAlgorithmException;
  * @description
  */
 abstract class AbstractFpePrepare {
-    static byte[] genAESKey() throws NoSuchAlgorithmException {
-        // 初始化 aes 密钥（随机），长度必须是16bytes、24bytes或32bytes
-        // 生成一个AES密钥
-        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-        keyGen.init(128); // 128位密钥
-        SecretKey secretKey = keyGen.generateKey();
-        byte[] key = secretKey.getEncoded();
-
-        return key;
-    }
-
     /**
      * 手机号码
      */
@@ -40,6 +27,8 @@ abstract class AbstractFpePrepare {
         // 解密
         String decrypt = fpe.decrypt(encrypt);
         System.out.println("解密后的phone: " + decrypt);
+
+        assertEquals(phone, decrypt);
     }
 
     /**
@@ -53,6 +42,8 @@ abstract class AbstractFpePrepare {
         // 解密
         String decrypt = fpe.decrypt(encrypt);
         System.out.println("解密后的信用卡号: " + decrypt);
+
+        assertEquals(creditCardNumber, decrypt);
     }
 
     /**
@@ -66,5 +57,7 @@ abstract class AbstractFpePrepare {
         // 解密
         String decrypt = fpe.decrypt(encrypt);
         System.out.println("解密后的字符串: " + decrypt);
+
+        assertEquals(str, decrypt);
     }
 }

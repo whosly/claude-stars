@@ -6,7 +6,6 @@ import org.bouncycastle.crypto.AlphabetMapper;
 /**
  * @author fengyang
  * @date 2025-10-27 11:13:34
- * @description
  */
 public class FPEFactory {
 

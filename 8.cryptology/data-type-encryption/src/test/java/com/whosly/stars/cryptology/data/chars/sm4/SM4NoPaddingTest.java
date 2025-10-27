@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.Optional;
@@ -29,14 +30,14 @@ public class SM4NoPaddingTest {
             byte[] key = "0123456701234567".getBytes(); // 16字节密钥
 
             System.out.println("原始数据: " + testData);
-            System.out.println("数据长度: " + testData.getBytes().length + " 字节");
+            System.out.println("数据长度: " + testData.getBytes(StandardCharsets.UTF_8).length + " 字节");
 
             // 测试NoPadding模式
             byte[] encrypted = sm4Crypto.encrypt(testData, key, EncMode.ECB, PaddingMode.NoPadding, Optional.empty());
             System.out.println("加密后长度: " + encrypted.length + " 字节");
 
             byte[] decrypted = sm4Crypto.decrypt(encrypted, key, EncMode.ECB, PaddingMode.NoPadding, Optional.empty());
-            String result = new String(decrypted);
+            String result = new String(decrypted, "utf-8");
 
             System.out.println("解密结果: " + result);
             System.out.println("解密结果长度: " + result.length() + " 字节");
