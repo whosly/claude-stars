@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -63,23 +66,44 @@ public class LongFPECryptoTest {
     @Test
     public void testLen4() {
         for (int i = 0; i < 5; i++) {
+            List<Long> allVal = new ArrayList<>();
             for (long source = -9999; source <= 9999; source++) {
-                long encLongVal = this.longFPECrypto.encrypt(source);
+                allVal.add(source);
+            }
+
+            allVal.parallelStream().forEach(val -> {
+                long encLongVal = this.longFPECrypto.encrypt(val);
 
                 long decLongVal = this.longFPECrypto.decrypt(encLongVal);
-                assertEquals(source, decLongVal);
-            }
+                assertEquals(val, decLongVal);
+            });
         }
     }
 
     @Test
     public void testLen5() {
+        List<Long> allVal = new ArrayList<>();
         for (long source = -99999; source <= 99999L; source++) {
-            long encLongVal = this.longFPECrypto.encrypt(source);
+            allVal.add(source);
+        }
+
+        allVal.parallelStream().forEach(val -> {
+            long encLongVal = this.longFPECrypto.encrypt(val);
 
             long decLongVal = this.longFPECrypto.decrypt(encLongVal);
-            assertEquals(source, decLongVal);
-        }
+            assertEquals(val, decLongVal);
+        });
+    }
+
+    @Test
+    public void testFPEEngineBasic() {
+        long testValue = 123456789L;
+
+        long encrypted = this.longFPECrypto.encrypt(testValue);
+        long decrypted = this.longFPECrypto.decrypt(encrypted);
+
+        System.out.println("FPE引擎测试: " + testValue + " -> " + encrypted + " -> " + decrypted);
+        assertEquals(testValue, decrypted, "FPE引擎基本加解密失败");
     }
 
     @Test

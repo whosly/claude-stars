@@ -1,5 +1,6 @@
-package com.whosly.stars.cryptology.data.datex;
+package com.whosly.stars.cryptology.data.datex.impl;
 
+import com.whosly.stars.cryptology.data.datex.ILocalDatexFPE;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class LocalDateFPEImplTest {
 
-    private ILocalDateFPE fpe;
+    private ILocalDatexFPE fpe;
 
     @BeforeEach
     public void setUp() throws NoSuchAlgorithmException {
@@ -26,12 +27,12 @@ class LocalDateFPEImplTest {
                 // 16字节密钥的Base64
                 .keyFromBase64("MDEyMzQ1Njc4OUFCQ0RFRg==")
                 .dateRange(
-                        LocalDate.of(2000, 1, 1),
+                        LocalDate.of(1965, 1, 1),
                         LocalDate.of(2081, 12, 30)
                 )
                 .build();
 
-        this.fpe = config.createFPE();
+        this.fpe = config.createLocalDateFPE();
     }
 
     @Test
@@ -46,7 +47,7 @@ class LocalDateFPEImplTest {
                     .build();
 
             // 2. 创建 FPE 实例
-            ILocalDateFPE fpeSingle = config.createFPE();
+            ILocalDatexFPE fpeSingle = config.createLocalDateFPE();
 
             // 4. 使用加密解密
             LocalDate original = LocalDate.of(2023, 6, 15);
@@ -85,7 +86,7 @@ class LocalDateFPEImplTest {
                 .build();
 
         // 2. 创建 FPE 实例
-        ILocalDateFPE fpeSingle = config.createFPE();
+        ILocalDatexFPE fpeSingle = config.createLocalDateFPE();
 
         System.out.println("原始日期        加密后        解密后");
         for (int year = 1965; year <= 2080; year++) {
@@ -108,11 +109,7 @@ class LocalDateFPEImplTest {
                         System.out.println(original + "    " + encrypted + "   " + decrypted);
                     }
 
-                    try{
-                        assertTrue(original.equals(decrypted), "原始日期:"+original+", 解密后: "+decrypted+", 加密后: " + encrypted);
-                    }catch (Throwable t){
-                        System.err.println(original + "    " + encrypted + "   " + decrypted);
-                    }
+                    assertTrue(original.equals(decrypted), "原始日期:"+original+", 解密后: "+decrypted+", 加密后: " + encrypted);
                 }
             }
         }
@@ -122,7 +119,6 @@ class LocalDateFPEImplTest {
     public void testSomeDate() throws NoSuchAlgorithmException {
         System.out.println("Min date: " + fpe.getMinDate());
         System.out.println("Max date: " + fpe.getMaxDate());
-        System.out.println("Total days: " + fpe.getTotalDays());
 
         // 测试特定日期
         LocalDate[] testDates = {
@@ -199,7 +195,6 @@ class LocalDateFPEImplTest {
             LocalDate[] testDates = {
                     this.fpe.getMinDate().plusDays(2),
                     this.fpe.getMinDate().plusDays(1),
-                    this.fpe.getMinDate().plusDays(this.fpe.getTotalDays().longValue() / 2),
                     this.fpe.getMinDate()
             };
 

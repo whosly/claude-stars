@@ -1,4 +1,8 @@
-package com.whosly.stars.cryptology.data.datex;
+package com.whosly.stars.cryptology.data.datex.impl;
+
+import com.whosly.stars.cryptology.data.datex.IDateFPE;
+import com.whosly.stars.cryptology.data.datex.ILocalDatexFPE;
+import com.whosly.stars.cryptology.data.datex.ITimestampFPE;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -57,8 +61,18 @@ public class FPEConfig {
         }
     }
 
-    public ILocalDateFPE createFPE() {
+    public IDateFPE createFPE() {
         return new DefaultDateFPEImpl(key, minDate, maxDate);
+    }
+
+    @Deprecated
+    public ILocalDatexFPE createLocalDateFPE() {
+        return new DefaultLocalDatexFPEImpl(key, minDate, maxDate);
+    }
+
+    @Deprecated
+    public ITimestampFPE createTimestampFPE() {
+        return new DefaultTimestampFPEImpl(key, minDate, maxDate);
     }
 
     // Getters
