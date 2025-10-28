@@ -1,33 +1,31 @@
 package com.whosly.stars.cryptology.data.datex;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Base64;
+import java.util.Date;
 
 /**
  * FPE 配置类
  *
  * @author fengyang
  * @date 2025-10-27 17:02:43
- * @description
  */
 public class FPEConfig {
     private final byte[] key;
     private final LocalDate minDate;
     private final LocalDate maxDate;
-    private final int rounds;
 
-    private FPEConfig(byte[] key, LocalDate minDate, LocalDate maxDate, int rounds) {
+    private FPEConfig(byte[] key, LocalDate minDate, LocalDate maxDate) {
         this.key = key;
         this.minDate = minDate;
         this.maxDate = maxDate;
-        this.rounds = rounds;
     }
 
     public static class Builder {
         private byte[] key;
         private LocalDate minDate = LocalDate.of(1970, 1, 1);
         private LocalDate maxDate = LocalDate.of(2070, 12, 31);
-        private int rounds = 8;
 
         public Builder key(byte[] key) {
             this.key = key;
@@ -45,8 +43,9 @@ public class FPEConfig {
             return this;
         }
 
-        public Builder rounds(int rounds) {
-            this.rounds = rounds;
+        public Builder dateRange(Date minDate, Date maxDate) {
+            this.minDate = minDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            this.maxDate = maxDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             return this;
         }
 
@@ -54,17 +53,16 @@ public class FPEConfig {
             if (key == null) {
                 throw new IllegalStateException("Key must be set");
             }
-            return new FPEConfig(key, minDate, maxDate, rounds);
+            return new FPEConfig(key, minDate, maxDate);
         }
     }
 
     public ILocalDateFPE createFPE() {
-        return new LocalDateFPEImpl(key, minDate, maxDate, rounds);
+        return new DefaultDateFPEImpl(key, minDate, maxDate);
     }
 
     // Getters
     public byte[] getKey() { return key.clone(); }
     public LocalDate getMinDate() { return minDate; }
     public LocalDate getMaxDate() { return maxDate; }
-    public int getRounds() { return rounds; }
 }

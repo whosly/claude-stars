@@ -27,7 +27,7 @@ public class LongFPECryptoTest {
     @Test
     public void testLen1() {
         for (int i = 0; i < 5; i++) {
-            for (long source = 0; source < 10; source++) {
+            for (long source = -9; source <= 9; source++) {
                 long encLongVal = this.longFPECrypto.encrypt(source);
 
                 long decLongVal = this.longFPECrypto.decrypt(encLongVal);
@@ -39,7 +39,7 @@ public class LongFPECryptoTest {
     @Test
     public void testLen2() {
         for (int i = 0; i < 5; i++) {
-            for (long source = 10; source < 100; source++) {
+            for (long source = -99; source <= 99; source++) {
                 long encLongVal = this.longFPECrypto.encrypt(source);
 
                 long decLongVal = this.longFPECrypto.decrypt(encLongVal);
@@ -51,7 +51,7 @@ public class LongFPECryptoTest {
     @Test
     public void testLen3() {
         for (int i = 0; i < 5; i++) {
-            for (long source = 100; source < 1000; source++) {
+            for (long source = -999; source <= 999; source++) {
                 long encLongVal = this.longFPECrypto.encrypt(source);
 
                 long decLongVal = this.longFPECrypto.decrypt(encLongVal);
@@ -63,7 +63,7 @@ public class LongFPECryptoTest {
     @Test
     public void testLen4() {
         for (int i = 0; i < 5; i++) {
-            for (long source = 1000; source < 10000; source++) {
+            for (long source = -9999; source <= 9999; source++) {
                 long encLongVal = this.longFPECrypto.encrypt(source);
 
                 long decLongVal = this.longFPECrypto.decrypt(encLongVal);
@@ -74,7 +74,7 @@ public class LongFPECryptoTest {
 
     @Test
     public void testLen5() {
-        for (long source = 10000; source < 100000L; source++) {
+        for (long source = -99999; source <= 99999L; source++) {
             long encLongVal = this.longFPECrypto.encrypt(source);
 
             long decLongVal = this.longFPECrypto.decrypt(encLongVal);

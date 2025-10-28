@@ -5,7 +5,6 @@ package com.whosly.stars.cryptology.data.common.fpe;
  *
  * @author fengyang
  * @date 2025-10-27 11:01:06
- * @description
  */
 public enum CharacterSet {
     /**
