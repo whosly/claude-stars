@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,11 +14,11 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class BigIntegerFPETest {
 
-    private BigIntegerFPE bigIntegerFPE;
+    private TinkBigIntegerFPE bigIntegerFPE;
 
     @BeforeEach
-    public void setUp() throws NoSuchAlgorithmException {
-        this.bigIntegerFPE = new BigIntegerFPE();
+    public void setUp() throws GeneralSecurityException {
+        this.bigIntegerFPE = new TinkBigIntegerFPE();
     }
 
     @Test

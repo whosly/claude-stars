@@ -108,7 +108,7 @@ public class TinkBigIntegerFPE {
     /**
      * 加密 BigInteger
      */
-    public BigInteger encrypt(BigInteger value, BigInteger domainSize) throws GeneralSecurityException {
+    public BigInteger encrypt(BigInteger value, BigInteger domainSize) {
         validateInput(value, domainSize);
 
         // 特殊处理小域
@@ -126,7 +126,7 @@ public class TinkBigIntegerFPE {
     /**
      * 解密 BigInteger
      */
-    public BigInteger decrypt(BigInteger encryptedValue, BigInteger domainSize) throws GeneralSecurityException {
+    public BigInteger decrypt(BigInteger encryptedValue, BigInteger domainSize) {
         validateInput(encryptedValue, domainSize);
 
         if (domainSize.compareTo(BigInteger.ONE) <= 0) {
@@ -137,13 +137,17 @@ public class TinkBigIntegerFPE {
         }
 
         int rounds = calculateRounds(domainSize);
-        return feistelDecrypt(encryptedValue, domainSize, rounds);
+        try {
+            return feistelDecrypt(encryptedValue, domainSize, rounds);
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * Feistel 网络加密
      */
-    private BigInteger feistelEncrypt(BigInteger value, BigInteger domainSize, int rounds) throws GeneralSecurityException {
+    private BigInteger feistelEncrypt(BigInteger value, BigInteger domainSize, int rounds) {
         BigInteger[] domains = optimalDomainSplit(domainSize);
         BigInteger leftSize = domains[0];
         BigInteger rightSize = domains[1];
@@ -153,7 +157,12 @@ public class TinkBigIntegerFPE {
 
         for (int round = 0; round < rounds; round++) {
             BigInteger temp = left;
-            BigInteger fOutput = computeRoundFunction(right, leftSize, round, domainSize);
+            BigInteger fOutput = null;
+            try {
+                fOutput = computeRoundFunction(right, leftSize, round, domainSize);
+            } catch (GeneralSecurityException e) {
+                throw new RuntimeException(e);
+            }
             left = right;
             right = temp.xor(fOutput).mod(leftSize);
         }
@@ -162,7 +171,7 @@ public class TinkBigIntegerFPE {
 
         // 验证结果在域范围内
         if (result.compareTo(domainSize) >= 0) {
-            throw new GeneralSecurityException("Encryption result out of domain range");
+            throw new RuntimeException("Encryption result out of domain range");
         }
 
         return result;
