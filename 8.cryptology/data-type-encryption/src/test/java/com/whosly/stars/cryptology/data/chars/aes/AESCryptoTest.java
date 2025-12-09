@@ -1,16 +1,15 @@
 package com.whosly.stars.cryptology.data.chars.aes;
 
+import com.whosly.stars.cryptology.data.BCFactory;
 import com.whosly.stars.cryptology.data.common.dataprepare.FileReader;
 import com.whosly.stars.cryptology.data.common.enums.BitLenMode;
 import com.whosly.stars.cryptology.data.common.enums.EncMode;
 import com.whosly.stars.cryptology.data.common.enums.PaddingMode;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.security.Security;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,15 +24,7 @@ public class AESCryptoTest {
     private static Map<String, String> processResult = new HashMap<>();
 
     static {
-        registerAlgorithm();
-    }
-
-    private static void registerAlgorithm() {
-        try {
-            Security.addProvider(new BouncyCastleProvider());
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+        BCFactory.loading();
     }
 
     private AESCrypto aesCrypto = null;
