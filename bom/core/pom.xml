@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.whosly.claude</groupId>
+    <artifactId>bom-core</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+    <name>bom-core</name>
+    <description>bom-core</description>
+
+    <properties>
+        <!-- 项目版本号 -->
+        <revision>1.0.0-SNAPSHOT</revision>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+        <git.commit.plugin>9.0.1</git.commit.plugin>
+        <maven.compiler.target>17</maven.compiler.target>
+        <spring.checkstyle.plugin>0.0.47</spring.checkstyle.plugin>
+
+        <com.aliyun.oss.version>3.15.1</com.aliyun.oss.version>
+        <commons.lang3.version>3.12.0</commons.lang3.version>
+        <easyexcel.version>3.3.4</easyexcel.version>
+        <fastjson.version>1.2.83</fastjson.version>
+        <guava.version>33.3.0-jre</guava.version>
+        <lombok.version>1.18.30</lombok.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <mysql.version>8.0.22</mysql.version>
+        <netty.version>4.1.108.Final</netty.version>
+        <hutool.version>5.8.42</hutool.version>
+        <jjwt.version>0.11.5</jjwt.version>
+        <swagger.core.version>2.2.39</swagger.core.version>
+        <swagger.fox.version>3.0.0</swagger.fox.version>
+
+        <junit.version>5.11.2</junit.version>
+        <junit.jupiter.version>${junit.version}</junit.jupiter.version>
+        <mockito.version>4.11.0</mockito.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+
+            <!-- hutool bom 工具类 -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-bom</artifactId>
+                <version>${hutool.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations-jakarta</artifactId>
+                <version>${swagger.core.version}</version>
+            </dependency>
+
+            <!-- mysql -->
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons.lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>easyexcel</artifactId>
+                <version>${easyexcel.version}</version>
+            </dependency>
+
+            <!-- JWT -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${security.token.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <!-- MapStruct -->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+
+            <!-- 阿里云 OSS -->
+            <dependency>
+                <groupId>com.aliyun.oss</groupId>
+                <artifactId>aliyun-sdk-oss</artifactId>
+                <version>${com.aliyun.oss.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <finalName>${project.name}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                        <nonFilteredFileExtensions>
+                            <nonFilteredFileExtension>doc</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>docx</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>xls</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>xlsx</nonFilteredFileExtension>
+                        </nonFilteredFileExtensions>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                    <configuration>
+                        <finalName>${project.build.finalName}</finalName>
+                        <layers>
+                            <enabled>true</enabled>
+                        </layers>
+                        <excludes>
+                            <exclude>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </exclude>
+                        </excludes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!--打包jar 与git commit 关联插件-->
+                <plugin>
+                    <groupId>io.github.git-commit-id</groupId>
+                    <artifactId>git-commit-id-maven-plugin</artifactId>
+                    <version>${git.commit.plugin}</version>
+                    <executions>
+                        <execution>
+                            <id>get-the-git-infos</id>
+                            <phase>initialize</phase>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                        <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                        <!--因为项目定制了jackson的日期时间序列化/反序列化格式，因此这里要进行配置,不然通过management.info.git.mode=full进行完整git信息监控时会存在问题-->
+                        <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
+                        <includeOnlyProperties>
+                            <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
+                            <includeOnlyProperty>^git.commit.(id|message|time).*$</includeOnlyProperty>
+                        </includeOnlyProperties>
+                    </configuration>
+                </plugin>
+                <!--
+                代码格式插件，默认使用spring 规则，可运行命令进行项目格式化：./mvnw spring-javaformat:apply 或 mvn spring-javaformat:apply，可在IDEA中安装插件以下插件进行自动格式化：
+                https://repo1.maven.org/maven2/io/spring/javaformat/spring-javaformat-intellij-idea-plugin
+            -->
+                <plugin>
+                    <groupId>io.spring.javaformat</groupId>
+                    <artifactId>spring-javaformat-maven-plugin</artifactId>
+                    <version>${spring.checkstyle.plugin}</version>
+                    <executions>
+                        <execution>
+                            <phase>validate</phase>
+                            <inherited>true</inherited>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!-- 统一 revision 版本 -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>${flatten-maven-plugin.version}</version>
+                    <configuration>
+                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                        <updatePomFile>true</updatePomFile>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>flatten</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>flatten</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>flatten.clean</id>
+                            <phase>clean</phase>
+                            <goals>
+                                <goal>clean</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
