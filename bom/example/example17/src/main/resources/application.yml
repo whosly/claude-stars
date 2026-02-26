@@ -1,18 +1,6 @@
 server:
   port: 8081
 
-com:
-  xwxcloud:
-#    file:
-#      enable: false
-#      xxx: yyy
-    portal:
-      enable: false
-      xxx: yyy
-    auth:
-      enable: true
-      xxx: yyy
-
 logging:
   level:
     root: info
