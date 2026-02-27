@@ -31,6 +31,8 @@
         <fastjson.version>1.2.83</fastjson.version>
         <google-gson.version>2.11.0</google-gson.version>
         <guava.version>33.3.0-jre</guava.version>
+        <httpclient.version>4.5.14</httpclient.version>
+        <HikariCP.version>5.0.1</HikariCP.version>
         <hutool.version>5.8.42</hutool.version>
         <jjwt.version>0.11.5</jjwt.version>
         <lombok.version>1.18.30</lombok.version>
@@ -114,6 +116,18 @@
                 <version>${guava.version}</version>
             </dependency>
 
+            <!-- HttpClient -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <!-- 连接池 -->
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${HikariCP.version}</version>
+            </dependency>
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
